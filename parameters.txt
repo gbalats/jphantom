@@ -1,0 +1,7 @@
+-log
+4
+--save-class-files
+--target
+out/complement.jar
+-s
+testing/antlr-minus.jar
