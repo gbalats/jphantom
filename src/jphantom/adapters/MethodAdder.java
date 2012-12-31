@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import jphantom.access.Modifier;
+import jphantom.exc.IllegalBytecodeException;
 import static jphantom.access.Modifier.*;
 
 public class MethodAdder extends ClassVisitor implements Opcodes
@@ -34,7 +35,15 @@ public class MethodAdder extends ClassVisitor implements Opcodes
     public void visit(int version, int access, String name, 
                       String signature, String superName, String[] interfaces)
     {
-        boolean iface = decode(access).contains(INTERFACE);
+        boolean iface;
+
+        try {
+            iface = decode(access).contains(INTERFACE);
+        } catch (Modifier.IllegalModifierException exc) {
+            throw new IllegalBytecodeException.Builder(name)
+                .cause(exc).build();
+        }
+
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -47,7 +56,15 @@ public class MethodAdder extends ClassVisitor implements Opcodes
             {
                 mn.visitCode();
 
-                if (!decode(mn.access).contains(STATIC)) {
+                boolean isStatic;
+                
+                try {
+                    isStatic = decode(mn.access).contains(STATIC);
+                } catch (Modifier.IllegalModifierException exc) {
+                    throw new AssertionError("Modifiers are already tested");
+                }
+
+                if (!isStatic) {
                     mn.visitVarInsn(ALOAD, 0); // this
                 }
 

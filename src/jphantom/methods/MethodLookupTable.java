@@ -5,6 +5,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.commons.Method;
+import jphantom.access.*;
+import jphantom.exc.IllegalBytecodeException;
 
 import static util.Utils.*;
 
@@ -82,10 +85,16 @@ public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
         public MethodVisitor visitMethod(int access, String name, String desc, 
                                          String signature, String[] exceptions)
         {
-            get(clazz).add(
-                new MethodSignature.Builder(name, desc)
-                .access(access).exceptions(exceptions).build()
-            );
+            try {
+               get(clazz).add(
+                  new MethodSignature.Builder(name, desc)
+                  .access(access).exceptions(exceptions).build()
+               );
+            } catch (Modifier.IllegalModifierException exc) {
+                throw new IllegalBytecodeException.Builder(clazz)
+                    .method(name, desc).cause(exc).build();
+            }
+
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
 

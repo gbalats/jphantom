@@ -225,6 +225,7 @@ public enum Modifier implements ApplicableToElements {
      * @see org.objectweb.asm.Opcodes
      */
     public static EnumSet<Modifier> decode(int modifiers)
+        throws IllegalModifierException
     {
         EnumSet<Modifier> am = EnumSet.noneOf(Modifier.class);
         
@@ -236,8 +237,7 @@ public enum Modifier implements ApplicableToElements {
         int mask = modifiers & ~encode(am);
 
         if (mask != 0)
-            throw new IllegalArgumentException(
-                "Flags contain some unknown modifier(s): " + mask);
+            throw new IllegalModifierException(mask);
         return am;
     }
 
@@ -294,7 +294,7 @@ public enum Modifier implements ApplicableToElements {
      * @throws IllegalArgumentException if {@code args} contains an unknown
      *         modifier
      */
-    public static void main(String [] args)
+    public static void main(String [] args) throws IllegalModifierException
     {
         if (args.length == 0) {
             System.out.println("Printing all modifiers: ");
@@ -360,5 +360,14 @@ public enum Modifier implements ApplicableToElements {
 
         assert modifiers.equals(decode(encode(modifiers)));
         System.out.println("ASM mask: " + encode(modifiers));
+    }
+
+    public static class IllegalModifierException extends Exception
+    {
+        protected static final long serialVersionUID = 2376872342634L;
+
+        public IllegalModifierException(int flag) {
+            super("Flags contain some unknown modifier(s): " + flag);
+        }
     }
 }

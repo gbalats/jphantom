@@ -14,7 +14,7 @@ public class MethodSignature extends Method
     private final Set<Modifier> modifiers;
     private final List<Type> exceptions;
 
-    private MethodSignature(Builder builder)
+    private MethodSignature(Builder builder) throws IllegalModifierException
     {
         super(builder.name, builder.desc);
         this.modifiers = decode(builder.access);
@@ -55,7 +55,7 @@ public class MethodSignature extends Method
             return this;
         }
 
-        public MethodSignature build() {
+        public MethodSignature build() throws IllegalModifierException {
             return new MethodSignature(this);
         }
     }
@@ -134,7 +134,9 @@ public class MethodSignature extends Method
         return modifiers.contains(PRIVATE);
     }
 
-    public static MethodSignature fromMethodNode(MethodNode node) {
+    public static MethodSignature fromMethodNode(MethodNode node)
+         throws IllegalModifierException
+    {
         return new Builder(node.name, node.desc)
             .access(node.access)
             .exceptions(node.exceptions.toArray(new String[0]))
