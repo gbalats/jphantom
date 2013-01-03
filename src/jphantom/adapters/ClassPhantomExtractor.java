@@ -1,6 +1,7 @@
 package jphantom.adapters;
 
 import jphantom.Phantoms;
+import jphantom.Transformer;
 import jphantom.access.*;
 import jphantom.tree.*;
 
@@ -116,8 +117,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Get top class visitor
 
-                ClassVisitor prev = phantoms.get(phantom);
-                assert prev != null;
+                Transformer tr = phantoms.get(phantom);
 
                 // Construct new method access context
 
@@ -133,8 +133,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 MethodNode method = new MethodNode(access, name, desc, null, null);
                 // TraceClassVisitor tcv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-                ClassVisitor cv = new MethodAdder(prev, method);
-                phantoms.put(phantom, cv);
+                assert tr.top != null;
+                tr.top = new MethodAdder(tr.top, method);
 
             } while(false);
 
@@ -193,8 +193,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Get top class visitor
 
-                ClassVisitor prev = phantoms.get(phantom);
-                assert prev != null;
+                Transformer tr = phantoms.get(phantom);
 
                 // Construct new field access context
 
@@ -210,8 +209,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 FieldNode field = new FieldNode(access, name, desc, null, null);
                 // TraceClassVisitor tcv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-                ClassVisitor cv = new FieldAdder(prev, field);
-                phantoms.put(phantom, cv);
+                assert tr.top != null;
+                tr.top = new FieldAdder(tr.top, field);
             } while(false);
 
             super.visitFieldInsn(opcode, owner, name, desc);

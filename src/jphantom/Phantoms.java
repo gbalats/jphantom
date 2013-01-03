@@ -3,15 +3,10 @@ package jphantom;
 import java.io.*;
 import java.util.*;
 import util.ForwardingMap;
-import util.Utils;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import jphantom.methods.MethodLookupTable;
 
-public class Phantoms extends ForwardingMap<Type,ClassVisitor> implements Opcodes
+public class Phantoms extends ForwardingMap<Type,Transformer>
 {
     /////////////////// Singleton ///////////////////
 
@@ -20,70 +15,35 @@ public class Phantoms extends ForwardingMap<Type,ClassVisitor> implements Opcode
 
     ////////////////// Constructor //////////////////
 
-    private Phantoms() { super(Utils.<Type,ClassVisitor>newMap()); }
+    private Phantoms() {
+        super(new HashMap<Type,Transformer>());
+    }
 
     ////////////////////  Fields ////////////////////
 
-    private Map<Type,ClassWriter> writers = Utils.newMap();
     final MethodLookupTable mtable = new MethodLookupTable(); // TODO: private
 
     //////////////////// Methods ////////////////////
 
-    @Override 
-    public ClassVisitor put(Type key, ClassVisitor value) {
-        if (!containsKey(key)) {
-            if (!ClassWriter.class.isInstance(value))
-                throw new IllegalArgumentException(
-                    "Type \'" + key + 
-                    "\': Initial visitor must be a ClassWriter instance");
-
-            // Store the first visitor, who must be a ClassWriter instance
-            writers.put(key, ClassWriter.class.cast(value));
-        }
-        return super.put(key, value);
-    }
-
-    public ClassVisitor putDefault(Type key) {
+    public Transformer putDefault(Type key)
+    {
         if (containsKey(key))
             throw new IllegalStateException(key + " is already mapped to a value");
 
-        ClassWriter cw = new ClassWriter(
-            ClassWriter.COMPUTE_MAXS |
-            ClassWriter.COMPUTE_FRAMES);
-
-        // Set initial flags
-        cw.visit(V1_5, 
-                 ACC_PUBLIC, 
-                 key.getInternalName(), 
-                 null, 
-                 Type.getInternalName(Object.class), 
-                 null
-            );
-        
-        cw.visitEnd();
-        put(key, cw);
-        put(key, mtable.new CachingAdapter(cw));
+        Transformer tr = new Transformer(key);
+        tr.top = mtable.new CachingAdapter(tr.top);
+        put(key, tr);
         return null;
-    }
-
-    public ClassVisitor getDefault(Type phantom)
-    {
-        if (!containsKey(phantom))
-            putDefault(phantom);
-        return get(phantom);
     }
 
     public List<File> generateFiles(File outDir) throws IOException
     {
-        List<File> files = Utils.newList();
+        List<File> files = new LinkedList<>();
 
-        for (Map.Entry<Type,ClassVisitor> e : entrySet())
+        for (Map.Entry<Type,Transformer> e : entrySet())
         {
             Type key = e.getKey();
-            ClassVisitor top = e.getValue();
-            ClassWriter cw = writers.get(key);
-            ClassReader cr = new ClassReader(cw.toByteArray());
-            cr.accept(top, 0);
+            byte[] bytes = e.getValue().transform();
 
             // Dump the class in a file
 
@@ -91,7 +51,7 @@ public class Phantoms extends ForwardingMap<Type,ClassVisitor> implements Opcode
             outFile.getParentFile().mkdirs();
             DataOutputStream dout = new DataOutputStream(new FileOutputStream(outFile));
             try {
-                dout.write(cw.toByteArray());
+                dout.write(bytes);
                 dout.flush();
             } finally {
                 dout.close();

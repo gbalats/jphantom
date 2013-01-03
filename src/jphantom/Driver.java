@@ -177,23 +177,19 @@ public class Driver implements StandardTypes
             assert phantoms.containsKey(p) : p;
 
             // Get top class visitor
-            ClassVisitor prev = phantoms.get(p);
-            ClassVisitor cv;
+            Transformer tr = phantoms.get(p);
 
-            assert prev != null;
+            assert tr.top != null;
 
             // Chain a superclass / interface adapter
 
-            cv = solution.isInterface(p) ? 
-                new InterfaceTransformer(prev) :
-                new SuperclassAdapter(prev, solution.getSuperclass(p));
-
-            phantoms.put(p, prev = cv);
+            tr.top = solution.isInterface(p) ? 
+                new InterfaceTransformer(tr.top) :
+                new SuperclassAdapter(tr.top, solution.getSuperclass(p));
 
             // Chain an interface adder
 
-            cv = new InterfaceAdder(prev, solution.getInterfaces(p));
-            phantoms.put(p, cv);
+            tr.top = new InterfaceAdder(tr.top, solution.getInterfaces(p));
         }
     }
     
