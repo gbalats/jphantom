@@ -5,6 +5,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.Opcodes;
 
 public class Transformer implements Command, Opcodes
@@ -37,17 +38,17 @@ public class Transformer implements Command, Opcodes
 
         bytes = cw.toByteArray();
         reader = new ClassReader(bytes);
-        top = writer = new ClassWriter(reader, options);
+        writer = new ClassWriter(reader, options);
+        top = new CheckClassAdapter(writer);
     }
 
     @Override
     public void execute() {
-        reader.accept(top, 0);
-        bytes = writer.toByteArray();
+        transform();
     }
 
     public byte[] transform() {
-        execute();
-        return bytes;
+        reader.accept(top, ClassReader.EXPAND_FRAMES);
+        return bytes = writer.toByteArray();
     }
 }

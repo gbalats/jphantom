@@ -51,21 +51,27 @@ public class MethodAdder extends ClassVisitor implements Opcodes
     public void visitEnd() {
         if (!isMethodPresent)
         {
-            // Add method body (only for classes)
-            if (!iface)
-            {
-                mn.visitCode();
-
-                boolean isStatic;
+            boolean isStatic, isAbstract;
                 
-                try {
-                    isStatic = decode(mn.access).contains(STATIC);
-                } catch (Modifier.IllegalModifierException exc) {
-                    throw new AssertionError("Modifiers are already tested");
-                }
+            try {
+                isStatic = decode(mn.access).contains(STATIC);
+                isAbstract = decode(mn.access).contains(ABSTRACT);
+            } catch (Modifier.IllegalModifierException exc) {
+                throw new AssertionError("Modifiers are already tested");
+            }
+
+            // Add method body (only for classes)
+            if (!iface && !isAbstract)
+            {
+                int maxStack = 2;
+                int maxLocals = 1 + Type.getArgumentTypes(mn.desc).length;
+
+                mn.visitCode();
 
                 if (!isStatic) {
                     mn.visitVarInsn(ALOAD, 0); // this
+                    maxStack++;
+                    maxLocals++;
                 }
 
                 mn.visitInsn(NOP);
@@ -80,6 +86,7 @@ public class MethodAdder extends ClassVisitor implements Opcodes
                 mn.visitInsn(DUP);
                 mn.visitMethodInsn(INVOKESPECIAL, exc, "<init>", desc);
                 mn.visitInsn(ATHROW);
+                mn.visitMaxs(maxStack, maxLocals);
                 mn.visitEnd();
             }
             mn.accept(cv);
