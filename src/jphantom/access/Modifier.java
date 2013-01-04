@@ -234,7 +234,9 @@ public enum Modifier implements ApplicableToElements {
                 am.add(mod);
 
         /* Check for unknown code */
-        int mask = modifiers & ~encode(am);
+        int possibleAccess = encode(am) |
+            0x40000; // ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
+        int mask = modifiers & ~possibleAccess;
 
         if (mask != 0)
             throw new IllegalModifierException(mask);
