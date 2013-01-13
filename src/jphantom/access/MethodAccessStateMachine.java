@@ -1,86 +1,106 @@
 package jphantom.access;
 
 import java.util.*;
-import java.lang.annotation.ElementType;
-import util.Utils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import jphantom.constraints.*;
 
-public class MethodAccessStateMachine extends AccessStateMachine<MethodAccessContext>
-    implements Opcodes
-{   
-    private boolean accessed = false;
-    private String desc;
-    private final String methodName;
-    private final Type owner;
+import com.google.common.collect.*;
 
-    private MethodAccessStateMachine(String name, Type owner) {
-        this.methodName = name;
-        this.owner = owner;
-    }
+public class MethodAccessStateMachine extends AccessStateMachine
+{
+    /////////////////////// States ///////////////////////
+
+    public static final State INIT_STATE = new State(ACC_PRIVATE).asPublic();
+    public static final State VIRTUAL_STATE = new State().asPublic();
+    public static final State STATIC_STATE = new State(ACC_STATIC).asPublic();
+    public static final State INTERFACE_STATE = new State(ACC_ABSTRACT).asPublic();
+
+    /////////////////////// Transition Table ///////////////////////
+
+    private final Table<State,Event,State> transitions = 
+        new ImmutableTable.Builder<State,Event,State>()
+        .put(INIT_STATE, new Event(INVOKEVIRTUAL), VIRTUAL_STATE)
+        .put(INIT_STATE, new Event(INVOKESPECIAL), VIRTUAL_STATE)
+        .put(INIT_STATE, new Event(INVOKESTATIC), STATIC_STATE)
+        .put(INIT_STATE, new Event(INVOKEINTERFACE), INTERFACE_STATE)
+        .put(VIRTUAL_STATE, new Event(INVOKEVIRTUAL), VIRTUAL_STATE)
+        .put(VIRTUAL_STATE, new Event(INVOKESPECIAL), VIRTUAL_STATE)
+        .put(STATIC_STATE, new Event(INVOKESTATIC), STATIC_STATE)
+        .put(INTERFACE_STATE, new Event(INVOKEINTERFACE), INTERFACE_STATE)
+        .build();
 
     @Override
-    public MethodAccessStateMachine moveTo(MethodAccessContext ctx)
-    {
-        if (accessed && !desc.equals(ctx.desc))
-            throw new IllegalStateException(
-                "Method \'" + owner.getClassName() + " " + methodName +
-                "\' has multiple descriptors: " + desc + " " + ctx.desc);
+    protected Table<State,Event,State> delegate() {
+        return transitions;
+    }
 
-        switch (ctx.opcode) {
-        case INVOKEVIRTUAL:
-            addConstraint(new IsaClassConstraint(owner));
-            break;
-        case INVOKESPECIAL:
-            // <clinit> is never called explicitly
-            // => name must be <init> => implies a class owner
-            addConstraint(new IsaClassConstraint(owner));
-            break;
-        case INVOKESTATIC:
-            addConstraint(new IsaClassConstraint(owner));
-            makeStatic();
-            break;
-        case INVOKEINTERFACE:
-            addConstraint(new IsanInterfaceConstraint(owner));
-            state.add(Modifier.ABSTRACT);
-            break;
-        default:
-            throw new AssertionError();
+    /////////////////////// Singleton Pattern ///////////////////////
+
+    protected MethodAccessStateMachine() {
+        super(INIT_STATE);
+    }
+
+    public static final MethodAccessStateMachine instance = 
+        new MethodAccessStateMachine();
+
+    public static MethodAccessStateMachine v() { return instance; }
+
+    /////////////////////// Sequence Inner Class ///////////////////////
+
+    public class EventSequence extends AccessStateMachine.EventSequence
+    {
+        private final String methodName;
+        private final Type owner;
+        private final String desc; // Lazy initialization
+
+        private EventSequence(String name, Type owner, String desc) {
+            this.methodName = name;
+            this.owner = owner;
+            this.desc = desc;
         }
-        accessed = true;
-        desc = ctx.desc;
-        state.add(Modifier.PUBLIC);
 
-        // Sanity Checks
-        assert !Modifier.hasConflict(state);
-        for (Modifier modifier : state)
-            assert modifier.appliesTo(ElementType.METHOD);
+        protected EventSequence checkDescriptor(String descriptor)
+        {
+            if (!desc.equals(descriptor))
+                throw new IllegalStateException(
+                    "Method \'" + owner.getClassName() + " " + methodName +
+                    "\' has multiple descriptors: " + desc + " " + descriptor);
+            return this;
+        }
 
-        return this;
+        public EventSequence moveTo(MethodAccessEvent event)
+        {
+            super.moveTo(event);
+
+            switch (event.getOpcode()) {
+            case INVOKEVIRTUAL:
+            case INVOKESTATIC:
+            case INVOKESPECIAL:
+                // <clinit> is never called explicitly
+                // => name must be <init> => implies a class owner
+                addConstraint(new IsaClassConstraint(owner));
+                break;
+            case INVOKEINTERFACE:
+                addConstraint(new IsanInterfaceConstraint(owner));
+                break;
+            default:
+                throw new AssertionError();
+            }
+
+            return checkDescriptor(event.desc);
+        }
     }
+
+    private Map<String,EventSequence> sequences = new HashMap<>();
     
-    private void makeStatic()
-    {
-        if (accessed && !state.contains(Modifier.STATIC))
-            throw new IllegalStateException(
-                "Method \'" + owner.getClassName() + " " + methodName + 
-                "\' must consistently be called as a static method");
-
-        state.add(Modifier.STATIC);
-    }
-
-    ///////////////// Factory Method ///////////////
-
-    private static Map<String,MethodAccessStateMachine> machines = Utils.newMap();
-    
-    public static MethodAccessStateMachine getInstance(String methodName, Type owner, String desc)
+    public EventSequence getEventSequence(String methodName, Type owner, String desc)
     {
         String key = owner.getClassName() + ":" + methodName + " " + desc;
 
-        if (!machines.containsKey(key))
-            machines.put(key, new MethodAccessStateMachine(methodName, owner));
+        if (!sequences.containsKey(key))
+            sequences.put(key, new EventSequence(methodName, owner, desc));
 
-        return machines.get(key);
+        return sequences.get(key);
     }
 }

@@ -1,12 +1,10 @@
 package jphantom.adapters;
 
 import java.util.*;
-import jphantom.access.Modifier;
 import jphantom.exc.IllegalBytecodeException;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.ClassVisitor;
-import static jphantom.access.Modifier.*;
 
 public class InterfaceTransformer extends ClassVisitor implements Opcodes
 {
@@ -19,20 +17,11 @@ public class InterfaceTransformer extends ClassVisitor implements Opcodes
         String name, String signature, 
         String superName, String[] interfaces)
     {
-        Set<Modifier> modifiers;
-
-        try {
-           modifiers = decode(oldAccess);
-        } catch (IllegalModifierException exc) {
-            throw new IllegalBytecodeException.Builder(name)
-                .cause(exc).build();
-        }
-
-        modifiers.add(INTERFACE);
+        int access = oldAccess | ACC_INTERFACE;
 
         super.visit(
             version, 
-            encode(modifiers), 
+            access, 
             name, 
             signature, 
             superName, 

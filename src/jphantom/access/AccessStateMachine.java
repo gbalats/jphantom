@@ -1,26 +1,47 @@
 package jphantom.access;
 
 import java.util.*;
+import org.objectweb.asm.Opcodes;
 import jphantom.constraints.*;
-import static util.Utils.*;
 
-public abstract class AccessStateMachine<C extends AccessContext>
+public abstract class AccessStateMachine 
+    extends StateMachine<State,Event>
+    implements Opcodes
 {
-    private static final List<Constraint> constraints = newList();
+    private final List<Constraint> constraints = new LinkedList<>();
 
-    protected Set<Modifier> state = EnumSet.noneOf(Modifier.class);
-
-    public abstract AccessStateMachine<C> moveTo(C ctx);
-
-    public int getCurrentAccess() {
-        return Modifier.encode(state);
+    protected AccessStateMachine(State initial) {
+        super(initial);
     }
 
-    protected static void addConstraint(Constraint constraint) {
+    protected void addConstraint(Constraint constraint) {
         constraints.add(constraint);
     }
 
-    public static Collection<Constraint> getConstraints() {
+    public Collection<Constraint> getConstraints() {
         return constraints;
+    }
+
+    public State get(State from, Event event)
+    {
+        State to = super.get(from, event);
+
+        if (to == null)
+            throw new IllegalTransitionException(from, event);
+
+        return to;
+    }
+
+    public class EventSequence {
+        private State current = initial;
+
+        public EventSequence moveTo(Event event) {
+            current = get(current, event);
+            return this;
+        }
+
+        public int getCurrentAccess() {
+            return current.getAccess();
+        }
     }
 }

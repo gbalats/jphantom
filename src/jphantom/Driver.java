@@ -116,7 +116,9 @@ public class Driver implements StandardTypes
         }
         
         // Additional constraints
-        for (Constraint c : AccessStateMachine.getConstraints())
+        for (Constraint c : FieldAccessStateMachine.v().getConstraints())
+            c.accept(solver);
+        for (Constraint c : MethodAccessStateMachine.v().getConstraints())
             c.accept(solver);
 
         for (Constraint c : solver.getConstraints())

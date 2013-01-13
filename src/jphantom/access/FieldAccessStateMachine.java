@@ -1,98 +1,104 @@
 package jphantom.access;
 
 import java.util.*;
-import java.lang.annotation.ElementType;
-import util.Utils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import jphantom.constraints.*;
 
-public class FieldAccessStateMachine extends AccessStateMachine<FieldAccessContext>
-    implements Opcodes
-{
-    private boolean accessed = false;
-    private String desc;
-    private final String fieldName;
-    private final Type owner;
+import com.google.common.collect.*;
 
-    private FieldAccessStateMachine(String name, Type owner) {
-        this.fieldName = name;
-        this.owner = owner;
-    }
+public class FieldAccessStateMachine extends AccessStateMachine
+{
+    /////////////////////// States ///////////////////////
+
+    public static final State EMPTY_STATE = new State().asPublic();
+    public static final State FINAL_STATE = new State(ACC_FINAL).asPublic();
+    public static final State STATIC_STATE = new State(ACC_STATIC).asPublic();
+    public static final State STATIC_FINAL_STATE = new State(ACC_STATIC | ACC_FINAL).asPublic();
+
+    /////////////////////// Transition Table ///////////////////////
+
+    private final Table<State,Event,State> transitions = 
+        new ImmutableTable.Builder<State,Event,State>()
+        .put(FINAL_STATE, new Event(GETFIELD), FINAL_STATE)
+        .put(FINAL_STATE, new Event(PUTFIELD), EMPTY_STATE)
+        .put(FINAL_STATE, new Event(GETSTATIC), STATIC_FINAL_STATE)
+        .put(FINAL_STATE, new Event(PUTSTATIC), STATIC_STATE)
+        .put(EMPTY_STATE, new Event(PUTFIELD), EMPTY_STATE)
+        .put(EMPTY_STATE, new Event(GETFIELD), EMPTY_STATE)
+        .put(STATIC_STATE, new Event(GETSTATIC), STATIC_STATE)
+        .put(STATIC_STATE, new Event(PUTSTATIC), STATIC_STATE)
+        .put(STATIC_FINAL_STATE, new Event(GETSTATIC), STATIC_FINAL_STATE)
+        .put(STATIC_FINAL_STATE, new Event(PUTSTATIC), STATIC_STATE)
+        .build();
 
     @Override
-    public FieldAccessStateMachine moveTo(FieldAccessContext ctx)
-    {
-        if (accessed && !desc.equals(ctx.desc))
-            throw new IllegalStateException(
-                "Field \'" + owner.getClassName() + " " + fieldName +
-                "\' has multiple descriptors: " + desc + " " + ctx.desc);
+    protected Table<State,Event,State> delegate() {
+        return transitions;
+    }
 
-        switch (ctx.opcode) {
-        case PUTSTATIC:
-            makeStatic();
-            makeNonFinal();
-            addConstraint(new IsaClassConstraint(owner));
-            break;
-        case GETSTATIC:
-            makeStatic();
-            makeFinal();
-            break;
-        case PUTFIELD:
-            makeNonFinal();
-            addConstraint(new IsaClassConstraint(owner));
-            break;
-        case GETFIELD: 
-            makeFinal();
-            addConstraint(new IsaClassConstraint(owner));
-            break;
-        default:
-            throw new AssertionError();
+    /////////////////////// Singleton Pattern ///////////////////////
+
+    protected FieldAccessStateMachine() {
+        super(FINAL_STATE);
+    }
+
+    public static final FieldAccessStateMachine instance = 
+        new FieldAccessStateMachine();
+
+    public static FieldAccessStateMachine v() { return instance; }
+
+
+    /////////////////////// Sequence Inner Class ///////////////////////
+
+    public class EventSequence extends AccessStateMachine.EventSequence
+    {
+        private final String fieldName;
+        private final Type owner;
+        private String desc; // Lazy initialization
+
+        private EventSequence(String name, Type owner) {
+            this.fieldName = name;
+            this.owner = owner;
         }
-        accessed = true;
-        desc = ctx.desc;
-        state.add(Modifier.PUBLIC);
 
-        // Sanity Checks
-        assert !Modifier.hasConflict(state);
-        for (Modifier modifier : state)
-            assert modifier.appliesTo(ElementType.FIELD);
+        protected EventSequence checkDescriptor(String descriptor)
+        {
+            if (desc == null)
+                desc = descriptor;
+            else if (!desc.equals(descriptor))
+                throw new IllegalStateException(
+                    "Field \'" + owner.getClassName() + " " + fieldName +
+                    "\' has multiple descriptors: " + desc + " " + descriptor);
+            return this;
+        }
 
-        return this;
+        public EventSequence moveTo(FieldAccessEvent event)
+        {
+            super.moveTo(event);
+
+            switch (event.getOpcode()) {
+            case PUTSTATIC: case PUTFIELD: case GETFIELD: 
+                addConstraint(new IsaClassConstraint(owner));
+            case GETSTATIC:
+                break;
+            default:
+                throw new AssertionError();
+            }
+
+            return checkDescriptor(event.desc);
+        }
     }
+
+    private Map<String,EventSequence> sequences = new HashMap<>();
     
-    private void makeStatic()
-    {
-        if (accessed && !state.contains(Modifier.STATIC))
-            throw new IllegalStateException(
-                "Field \'" + owner.getClassName() + " " + fieldName + 
-                "\' must consistently be used as a static field");
-
-        state.add(Modifier.STATIC);
-    }
-
-    private void makeFinal()
-    {
-        if (!accessed)
-            state.add(Modifier.FINAL);
-    }
-
-    private void makeNonFinal()
-    {
-        state.remove(Modifier.FINAL);
-    }
-
-    ///////////////// Factory Method ///////////////
-
-    private static Map<String,FieldAccessStateMachine> machines = Utils.newMap();
-    
-    public static FieldAccessStateMachine getInstance(String fieldName, Type owner)
+    public EventSequence getEventSequence(String fieldName, Type owner)
     {
         String key = owner.getClassName() + ":" + fieldName;
 
-        if (!machines.containsKey(key))
-            machines.put(key, new FieldAccessStateMachine(fieldName, owner));
+        if (!sequences.containsKey(key))
+            sequences.put(key, new EventSequence(fieldName, owner));
 
-        return machines.get(key);
+        return sequences.get(key);
     }
 }

@@ -2,36 +2,40 @@ package jphantom.access;
 
 import org.objectweb.asm.Opcodes;
 
-public class FieldAccessContext implements AccessContext, Opcodes
+public class FieldAccessEvent extends Event
 {
-    public final String methodName;
+    public final String name;
     public final String desc;
-    public final int opcode;
 
-    private FieldAccessContext(Builder builder) {
-        methodName = builder.mName;
-        opcode = builder.opcode;
+    private FieldAccessEvent(Builder builder) {
+        super(builder.opcode);
+        name = builder.fName;
         desc = builder.desc;
+    }
+
+    public String toString() {
+        return "Accessing field: " + name + desc + 
+            " " + super.toString();
     }
 
     public static class Builder
     {
-        private String mName = null;
+        private String fName = null;
         private String desc = null;
         private int opcode = NOP;
 
         public Builder() {}
 
-        public FieldAccessContext build() {
-            return new FieldAccessContext(this);
+        public FieldAccessEvent build() {
+            return new FieldAccessEvent(this);
         }
 
-        public Builder setMethod(String name) {
-            this.mName = name;
+        public Builder setName(String name) {
+            this.fName = name;
             return this;
         }
 
-        public Builder setDesc(String desc) {
+        public Builder setDescriptor(String desc) {
             this.desc = desc;
             return this;
         }

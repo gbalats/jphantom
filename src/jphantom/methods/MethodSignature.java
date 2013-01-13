@@ -2,22 +2,21 @@ package jphantom.methods;
 
 import java.util.*;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.commons.Method;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import jphantom.access.Modifier;
-import static jphantom.access.Modifier.*;
 
-public class MethodSignature extends Method
+public class MethodSignature extends Method implements Opcodes
 {
     private String repr;
-    private final Set<Modifier> modifiers;
+    private final int access;
     private final List<Type> exceptions;
 
-    private MethodSignature(Builder builder) throws IllegalModifierException
+    private MethodSignature(Builder builder)
     {
         super(builder.name, builder.desc);
-        this.modifiers = decode(builder.access);
+        this.access = builder.access;
         this.exceptions = Collections.unmodifiableList(
             Arrays.asList(builder.exceptions));
     }
@@ -55,7 +54,7 @@ public class MethodSignature extends Method
             return this;
         }
 
-        public MethodSignature build() throws IllegalModifierException {
+        public MethodSignature build() {
             return new MethodSignature(this);
         }
     }
@@ -65,7 +64,7 @@ public class MethodSignature extends Method
     }
 
     public int getAccess() {
-        return encode(modifiers);
+        return access;
     }
 
     public String toString() {
@@ -75,8 +74,7 @@ public class MethodSignature extends Method
         StringBuilder builder = new StringBuilder();
 
         // Access Modifiers
-        for (Modifier m : modifiers)
-            builder.append(m).append(' ');
+        appendAccess(builder);
 
         // Named Descriptor
         builder.append(toString(getReturnType()) + " " + getName() + "(");
@@ -127,19 +125,58 @@ public class MethodSignature extends Method
     // }
 
     public boolean isAbstract() {
-        return modifiers.contains(ABSTRACT);
+        return (access & ACC_ABSTRACT) != 0;
     }
 
     public boolean isPrivate() {
-        return modifiers.contains(PRIVATE);
+        return (access & ACC_PRIVATE) != 0;
     }
 
     public static MethodSignature fromMethodNode(MethodNode node)
-         throws IllegalModifierException
     {
         return new Builder(node.name, node.desc)
             .access(node.access)
             .exceptions(node.exceptions.toArray(new String[0]))
             .build();
+    }
+
+    private void appendAccess(StringBuilder buf)
+    {
+        if ((access & Opcodes.ACC_PUBLIC) != 0) {
+            buf.append("public ");
+        }
+        if ((access & Opcodes.ACC_PRIVATE) != 0) {
+            buf.append("private ");
+        }
+        if ((access & Opcodes.ACC_PROTECTED) != 0) {
+            buf.append("protected ");
+        }
+        if ((access & Opcodes.ACC_FINAL) != 0) {
+            buf.append("final ");
+        }
+        if ((access & Opcodes.ACC_STATIC) != 0) {
+            buf.append("static ");
+        }
+        if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) {
+            buf.append("synchronized ");
+        }
+        if ((access & Opcodes.ACC_VOLATILE) != 0) {
+            buf.append("volatile ");
+        }
+        if ((access & Opcodes.ACC_TRANSIENT) != 0) {
+            buf.append("transient ");
+        }
+        if ((access & Opcodes.ACC_ABSTRACT) != 0) {
+            buf.append("abstract ");
+        }
+        if ((access & Opcodes.ACC_STRICT) != 0) {
+            buf.append("strictfp ");
+        }
+        if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
+            buf.append("synthetic ");
+        }
+        if ((access & Opcodes.ACC_ENUM) != 0) {
+            buf.append("enum ");
+        }
     }
 }

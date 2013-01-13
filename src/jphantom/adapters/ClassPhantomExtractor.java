@@ -4,6 +4,7 @@ import jphantom.Phantoms;
 import jphantom.Transformer;
 import jphantom.access.*;
 import jphantom.tree.*;
+import jphantom.exc.IllegalBytecodeException;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -30,6 +31,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     private final Phantoms phantoms = Phantoms.V();
     private final ClassHierarchy hierarchy;
     private final SignatureVisitor sv;
+    private Type clazz;
+    private String mname;
+    private String mdesc;
 
     public ClassPhantomExtractor(int api, ClassVisitor cv, ClassHierarchy hierarchy) {
         super(api, cv);
@@ -67,6 +71,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader("" + iface).acceptType(sv);
             }
 
+        clazz = Type.getObjectType(name);
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -86,6 +91,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader(exc.toString()).acceptType(sv);
             }
         }
+        mname = name;
+        mdesc = desc;
         return new MethodPhantomExtractor(
             super.visitMethod(access, name, desc, signature, exceptions));
     }
@@ -121,21 +128,30 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Construct new method access context
 
-                MethodAccessContext ctx = new MethodAccessContext.Builder()
-                    .setOpcode(opcode).setDesc(desc).build();
+                MethodAccessEvent event = new MethodAccessEvent.Builder()
+                    .setOpcode(opcode)
+                    .setDescriptor(desc)
+                    .setName(name)
+                    .build();
 
-                // Compute new method access using the state machine
+                try {
+                    // Compute new method access using the state machine
 
-                int access = MethodAccessStateMachine
-                    .getInstance(name, phantom, desc).moveTo(ctx).getCurrentAccess();
+                    int access = MethodAccessStateMachine.v()
+                        .getEventSequence(name, phantom, desc).moveTo(event).getCurrentAccess();
 
-                // Chain a method-adder adapter
+                    // Chain a method-adder adapter
 
-                MethodNode method = new MethodNode(access, name, desc, null, null);
-                // TraceClassVisitor tcv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-                assert tr.top != null;
-                tr.top = new MethodAdder(tr.top, method);
+                    MethodNode method = new MethodNode(access, name, desc, null, null);
+                    
+                    assert tr.top != null;
+                    tr.top = new MethodAdder(tr.top, method);
 
+                } catch(IllegalTransitionException exc) {
+
+                    throw new IllegalBytecodeException.Builder(clazz)
+                        .method(mname, mdesc).cause(exc).build();
+                }
             } while(false);
 
             super.visitMethodInsn(opcode, owner, name, desc);
@@ -197,20 +213,30 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Construct new field access context
 
-                FieldAccessContext ctx = new FieldAccessContext.Builder()
-                    .setOpcode(opcode).setDesc(desc).build();
+                FieldAccessEvent event = new FieldAccessEvent.Builder()
+                    .setOpcode(opcode)
+                    .setDescriptor(desc)
+                    .setName(name)
+                    .build();
 
-                // Compute new field access using the state machine
+                try {
+                    // Compute new field access using the state machine
 
-                int access = FieldAccessStateMachine
-                    .getInstance(name, phantom).moveTo(ctx).getCurrentAccess();
+                    int access = FieldAccessStateMachine.v()
+                        .getEventSequence(name, phantom).moveTo(event).getCurrentAccess();
 
-                // Chain a field-adder adapter
+                    // Chain a field-adder adapter
+                    
+                    FieldNode field = new FieldNode(access, name, desc, null, null);
 
-                FieldNode field = new FieldNode(access, name, desc, null, null);
-                // TraceClassVisitor tcv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-                assert tr.top != null;
-                tr.top = new FieldAdder(tr.top, field);
+                    assert tr.top != null;
+                    tr.top = new FieldAdder(tr.top, field);
+
+                } catch(IllegalTransitionException exc) {
+
+                    throw new IllegalBytecodeException.Builder(clazz)
+                        .method(mname, mdesc).cause(exc).build();
+                }
             } while(false);
 
             super.visitFieldInsn(opcode, owner, name, desc);

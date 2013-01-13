@@ -90,7 +90,7 @@ public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
                   new MethodSignature.Builder(name, desc)
                   .access(access).exceptions(exceptions).build()
                );
-            } catch (Modifier.IllegalModifierException exc) {
+            } catch (RuntimeException exc) {
                 throw new IllegalBytecodeException.Builder(clazz)
                     .method(name, desc).cause(exc).build();
             }
