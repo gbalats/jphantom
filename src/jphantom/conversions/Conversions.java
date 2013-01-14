@@ -7,7 +7,7 @@ import org.objectweb.asm.Type;
 
 import static util.Utils.*;
 
-public class Conversions implements StandardTypes {
+public class Conversions implements Types {
 
     private Conversions() {
         throw new AssertionError();

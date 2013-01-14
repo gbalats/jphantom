@@ -1,11 +1,11 @@
 package jphantom.tree;
 
 import java.util.*;
-import jphantom.StandardTypes;
+import jphantom.Types;
 import org.objectweb.asm.Type;
 
 /** @author George Balatsouras */
-public interface ClassHierarchy extends Iterable<Type>, StandardTypes
+public interface ClassHierarchy extends Iterable<Type>, Types
 {    
     void addClass(Type clazz, Type superclass, Type[] interfaces);
     void addInterface(Type iface, Type[] superInterfaces);

@@ -14,7 +14,7 @@ import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 
 public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHierarchy>
-    implements StandardTypes, TypeConstraintSolver
+    implements Types, TypeConstraintSolver
 {
     private boolean initialized = false;
     protected ClassHierarchy hierarchy;

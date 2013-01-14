@@ -10,7 +10,7 @@ import org.objectweb.asm.Type;
 import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 
-public class MethodDeclarations implements StandardTypes
+public class MethodDeclarations implements Types
 {
     private final ClassHierarchy hierarchy;
     private final MethodLookupTable mtable;

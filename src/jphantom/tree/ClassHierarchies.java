@@ -6,10 +6,10 @@ import java.util.jar.*;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassReader;
-import jphantom.StandardTypes;
+import jphantom.Types;
 import static util.Utils.*;
 
-public class ClassHierarchies implements Opcodes, StandardTypes
+public class ClassHierarchies implements Opcodes, Types
 {
     private ClassHierarchies() {
         throw new AssertionError();

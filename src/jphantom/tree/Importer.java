@@ -2,11 +2,11 @@ package jphantom.tree;
 
 import util.*;
 import java.util.*;
-import jphantom.StandardTypes;
+import jphantom.Types;
 import org.objectweb.asm.Type;
 import static util.Utils.*;
 
-public class Importer implements Command, StandardTypes
+public class Importer implements Command, Types
 {
     private final ClassHierarchy target;
     private final ClassHierarchy source;

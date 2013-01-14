@@ -4,7 +4,7 @@ import java.util.*;
 import org.objectweb.asm.Type;
 import static util.Utils.*;
 
-public interface StandardTypes {
+public interface Types {
 
     public static final Type OBJECT = Type.getType(Object.class);
     public static final Type THROWABLE = Type.getType(Throwable.class);

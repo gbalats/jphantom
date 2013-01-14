@@ -12,7 +12,7 @@ import org.objectweb.asm.Type;
 
 import static util.Utils.*;
 
-public class TypeInterpreter extends BasicInterpreter implements Opcodes, StandardTypes
+public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
 {
     private static final Map<Type,BasicValue> values = newMap();
     protected static final BasicValue NULL_VALUE = new BasicValue(NULL_TYPE);

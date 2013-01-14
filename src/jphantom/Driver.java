@@ -24,7 +24,7 @@ import org.objectweb.asm.tree.analysis.*;
 import static jphantom.constraints.solvers.AbstractSolver.UnsatisfiableStateException;
 import static util.Utils.*;
 
-public class Driver implements StandardTypes
+public class Driver implements Types
 {
     /* Fields */
 

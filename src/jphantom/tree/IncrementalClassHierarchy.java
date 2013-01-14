@@ -8,7 +8,7 @@ import static util.Utils.*;
 
 /** @author George Balatsouras */
 public class IncrementalClassHierarchy extends AbstractClassHierarchy 
-    implements StandardTypes
+    implements Types
 {    
     ///////////////// Fields /////////////////
 

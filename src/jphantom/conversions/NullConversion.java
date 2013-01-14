@@ -1,10 +1,10 @@
 package jphantom.conversions;
 
 import org.objectweb.asm.Type;
-import jphantom.StandardTypes;
+import jphantom.Types;
 
 public class NullConversion extends WideningReferenceConversion
-    implements StandardTypes
+    implements Types
 {
     NullConversion(Type to) {
         super(NULL_TYPE, to);

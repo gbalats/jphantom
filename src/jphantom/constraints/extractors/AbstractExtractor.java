@@ -9,7 +9,7 @@ import jphantom.constraints.solvers.*;
 
 import org.objectweb.asm.*;
 
-public abstract class AbstractExtractor implements ConversionVisitor, StandardTypes
+public abstract class AbstractExtractor implements ConversionVisitor, Types
 {
     protected final TypeConstraintSolver solver;
     protected final ClassHierarchy hierarchy;

@@ -1,13 +1,13 @@
 package jphantom.tree.graph;
 
-import jphantom.StandardTypes;
+import jphantom.Types;
 import jphantom.tree.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.CycleDetector;
 import org.objectweb.asm.Type;
 
-public class GraphConverter implements StandardTypes
+public class GraphConverter implements Types
 {
     private final ClassHierarchy hierarchy;
 
