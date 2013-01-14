@@ -1,10 +1,8 @@
 package jphantom.tree;
 
-import util.*;
 import java.util.*;
 import jphantom.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 /** @author George Balatsouras */
 public class IncrementalClassHierarchy extends AbstractClassHierarchy 
@@ -12,9 +10,9 @@ public class IncrementalClassHierarchy extends AbstractClassHierarchy
 {    
     ///////////////// Fields /////////////////
 
-    private final Map<Type,Type> directSuperclass = newMap();
-    private final Map<Type,Set<Type>> directImplInterfaces = newMap();
-    private final Map<Type,Boolean> isIface = newMap();
+    private final Map<Type,Type> directSuperclass = new HashMap<>();
+    private final Map<Type,Set<Type>> directImplInterfaces = new HashMap<>();
+    private final Map<Type,Boolean> isIface = new HashMap<>();
 
 
     ///////////////// Constructors /////////////////
@@ -56,7 +54,7 @@ public class IncrementalClassHierarchy extends AbstractClassHierarchy
     {
         // Create an unmodifiable set of interfaces
         Set<Type> ifaces = Collections.unmodifiableSet(
-            newSet(Arrays.asList(interfaces)));
+            new HashSet<>(Arrays.asList(interfaces)));
 
         assert !ifaces.contains(null);
         assert superclass != null || clazz.equals(OBJECT) : clazz;

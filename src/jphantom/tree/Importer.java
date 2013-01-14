@@ -1,10 +1,9 @@
 package jphantom.tree;
 
-import util.*;
+import util.Command;
 import java.util.*;
 import jphantom.Types;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public class Importer implements Command, Types
 {
@@ -33,7 +32,7 @@ public class Importer implements Command, Types
     {
         for (Type i : target)
         {
-            Set<Type> types = newSet(target.getInterfaces(i));
+            Set<Type> types = new HashSet<>(target.getInterfaces(i));
             Type sc = target.getSuperclass(i);
             
             if (sc != null)

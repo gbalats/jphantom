@@ -1,10 +1,9 @@
 package jphantom.constraints.solvers;
 
-import util.*;
+import util.Factory;
 import java.util.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
-import static util.Utils.*;
 
 public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
 {
@@ -104,7 +103,7 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
             new SimpleDirectedGraph<V,E>(graph.getEdgeFactory());
                 
         // Fill interface graph
-        for (E e : newSet(graph.edgeSet()))
+        for (E e : new HashSet<>(graph.edgeSet()))
         {
             V source = graph.getEdgeSource(e);
             V target = graph.getEdgeTarget(e);
@@ -122,7 +121,7 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
         }
 
         // Remove interfaces completely
-        for (V v : newSet(graph.vertexSet()))
+        for (V v : new HashSet<>(graph.vertexSet()))
             if (!classes.contains(v))
             {
                 assert graph.edgesOf(v).isEmpty();

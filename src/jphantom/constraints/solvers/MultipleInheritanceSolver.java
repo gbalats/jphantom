@@ -1,12 +1,11 @@
 package jphantom.constraints.solvers;
 
-import util.*;
+import util.MapFactory;
 import java.util.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.alg.TransitiveClosure;
-import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 
 public class MultipleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,List<V>>>
@@ -62,7 +61,7 @@ public class MultipleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,Lis
             addGraph(closure, graph);
             TransitiveClosure.INSTANCE.closeSimpleDirectedGraph(closure);
 
-            for (E e : newSet(graph.edgeSet()))
+            for (E e : new HashSet<>(graph.edgeSet()))
             {
                 V source = graph.getEdgeSource(e);
                 V target = graph.getEdgeTarget(e);

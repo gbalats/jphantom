@@ -8,7 +8,6 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.alg.TransitiveClosure;
 import static org.jgrapht.Graphs.*;
-import static util.Utils.*;
 
 /** @author George Balatsouras */
 public class CopyingSnapshot extends PseudoSnapshot
@@ -47,7 +46,7 @@ public class CopyingSnapshot extends PseudoSnapshot
     public Set<Type> getAllSupertypes(Type obj)
         throws IncompleteSupertypesException
     {
-        Set<Type> supertypes = newSet();
+        Set<Type> supertypes = new HashSet<>();
         
         for (Node n : successorListOf(closedGraph, Node.get(obj)))
             supertypes.add(n.asType());

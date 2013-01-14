@@ -1,10 +1,8 @@
 package jphantom.tree.closure;
 
-import util.*;
 import java.util.*;
 import jphantom.tree.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public class PseudoSnapshot extends AbstractSnapshot
 {    
@@ -23,7 +21,7 @@ public class PseudoSnapshot extends AbstractSnapshot
     public List<Type> getAllSuperclasses(Type obj) throws IncompleteSupertypesException
     {
         checkedContainedObject(obj);
-        List<Type> superclasses = newList();
+        List<Type> superclasses = new ArrayList<>();
 
         while((obj = getSuperclass(obj)) != null) {
             superclasses.add(obj);
@@ -64,7 +62,7 @@ public class PseudoSnapshot extends AbstractSnapshot
     public Set<Type> getAllSupertypes(Type obj) throws IncompleteSupertypesException
     {
         checkedContainedObject(obj);
-        Set<Type> supertypes = Utils.newSet();
+        Set<Type> supertypes = new HashSet<>();
         Queue<Type> queue = new LinkedList<Type>();
         boolean incomplete = false;
         
@@ -101,7 +99,7 @@ public class PseudoSnapshot extends AbstractSnapshot
     {
         checkedContainedObject(a);
         checkedContainedObject(b);
-        Set<Type> visited = Utils.newSet();
+        Set<Type> visited = new HashSet<>();
         boolean incomplete = false;
 
         while (a != null || b != null) {

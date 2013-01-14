@@ -7,7 +7,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassReader;
 import jphantom.Types;
-import static util.Utils.*;
 
 public class ClassHierarchies implements Opcodes, Types
 {
@@ -22,7 +21,7 @@ public class ClassHierarchies implements Opcodes, Types
 
     public static Set<Type> unknownTypes(ClassHierarchy hierarchy)
     {
-        Set<Type> unknown = newSet();
+        Set<Type> unknown = new HashSet<>();
 
         for (Type c : hierarchy)
         {

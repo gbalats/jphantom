@@ -2,10 +2,8 @@ package jphantom.conversions;
 
 import java.util.*;
 import jphantom.*;
-import util.*;
+import util.Pair;
 import org.objectweb.asm.Type;
-
-import static util.Utils.*;
 
 public class Conversions implements Types {
 
@@ -16,10 +14,10 @@ public class Conversions implements Types {
     // Primitive Conversion Maps
 
     private static final Map<Type, Set<Type>> WIDENING_PRIMITIVE_CONVERSIONS =
-        newMap();
+        new HashMap<>();
 
     private static final Map<Type, Set<Type>> NARROWING_PRIMITIVE_CONVERSIONS =
-        newMap();
+        new HashMap<>();
 
     public static boolean isPrimitive(Type t)
     {
@@ -66,19 +64,19 @@ public class Conversions implements Types {
     }
 
     static {
-        Set<Type> tmp = newSet(Arrays.asList(Type.DOUBLE_TYPE));
+        Set<Type> tmp = new HashSet<>(Arrays.asList(Type.DOUBLE_TYPE));
 
         Type[] types = {
             Type.FLOAT_TYPE, Type.LONG_TYPE, Type.INT_TYPE, 
             Type.CHAR_TYPE, Type.SHORT_TYPE, Type.BYTE_TYPE };
 
         for (Type t : types) {
-            WIDENING_PRIMITIVE_CONVERSIONS.put(t, newSet(tmp));
+            WIDENING_PRIMITIVE_CONVERSIONS.put(t, new HashSet<>(tmp));
             tmp.add(t);
         }
 
         NARROWING_PRIMITIVE_CONVERSIONS.put(
-            Type.INT_TYPE, newSet(
+            Type.INT_TYPE, new HashSet<>(
                 Arrays.asList(Type.CHAR_TYPE, Type.SHORT_TYPE, Type.BYTE_TYPE, Type.BOOLEAN_TYPE)));
     }
 
@@ -94,7 +92,7 @@ public class Conversions implements Types {
 
     // Cache
 
-    private static final Map<Pair<Type,Type>,Conversion> cache = newMap();
+    private static final Map<Pair<Type,Type>,Conversion> cache = new HashMap<>();
 
     public static Conversion getAssignmentConversion(Type from, Type to)
     {

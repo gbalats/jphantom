@@ -9,8 +9,6 @@ import org.objectweb.asm.commons.Method;
 import jphantom.access.*;
 import jphantom.exc.IllegalBytecodeException;
 
-import static util.Utils.*;
-
 public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
     protected static final long serialVersionUID = 834573459345L;
     protected int pendingAdapters = 0;

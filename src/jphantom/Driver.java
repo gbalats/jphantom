@@ -22,7 +22,6 @@ import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
 import static jphantom.constraints.solvers.AbstractSolver.UnsatisfiableStateException;
-import static util.Utils.*;
 
 public class Driver implements Types
 {
@@ -31,7 +30,7 @@ public class Driver implements Types
     private final ClassHierarchy hierarchy;
     private final File outDir;
     private final Phantoms phantoms = Phantoms.V();
-    private final Map<Type,ClassNode> nodes = newMap();
+    private final Map<Type,ClassNode> nodes = new HashMap<>();
 
     private final static Logger logger = 
         LoggerFactory.getLogger(Driver.class);

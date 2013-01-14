@@ -10,7 +10,6 @@ import jphantom.constraints.*;
 import org.jgrapht.*;
 import org.objectweb.asm.Type;
 
-import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 
 public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHierarchy>
@@ -323,7 +322,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
 
     private class RecursiveSolver extends MultipleInheritanceSolver<Type,SubtypeConstraint>
     {
-        private final Map<Type,List<Type>> domains = newMap();
+        private final Map<Type,List<Type>> domains = new HashMap<>();
         private Queue<Pair<Type,Type>> constraints;
 
         RecursiveSolver(DirectedGraph<Type,SubtypeConstraint> graph, boolean minimize)
@@ -341,7 +340,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                     Set<Type> supertypes = closure.getAllSupertypes(source);
                     domains.put(source, Collections.<Type>emptyList());
                 } catch (IncompleteSupertypesException exc) {
-                    List<Type> domain = newList();
+                    List<Type> domain = new ArrayList<>();
 
                     for (Type t : exc.getSupertypes())
                         if (!hierarchy.contains(t))
@@ -362,7 +361,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
 
             constraints = new LinkedList<Pair<Type,Type>>();
 
-            for (SubtypeConstraint e : newSet(graph.edgeSet()))
+            for (SubtypeConstraint e : new HashSet<>(graph.edgeSet()))
             {
                 Type source = graph.getEdgeSource(e);
                 Type target = graph.getEdgeTarget(e);

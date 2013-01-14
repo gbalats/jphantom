@@ -2,7 +2,6 @@ package jphantom.tree;
 
 import java.util.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public class SystemClassHierarchy extends AbstractClassHierarchy
 {
@@ -43,7 +42,7 @@ public class SystemClassHierarchy extends AbstractClassHierarchy
     @Override
     public Set<Type> getInterfaces(Type obj)
     {
-        Set<Type> ifaces = newSet();
+        Set<Type> ifaces = new HashSet<>();
 
         for (Class<?> c : asClass(obj).getInterfaces())
             ifaces.add(asType(c));

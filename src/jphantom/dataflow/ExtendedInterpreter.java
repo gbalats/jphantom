@@ -8,7 +8,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.*;
 import org.objectweb.asm.tree.*;
 
-import static util.Utils.*;
 import static jphantom.dataflow.TypeInterpreter.NULL_VALUE;
 
 
@@ -105,7 +104,7 @@ public class ExtendedInterpreter extends Interpreter<CompoundValue> implements O
         AbstractInsnNode insn,
         List< ? extends CompoundValue> values) throws AnalyzerException
     {
-        List<BasicValue> l = newList();
+        List<BasicValue> l = new LinkedList<>();
 
         for (CompoundValue v : values)
             l.add(v.asBasicValue());

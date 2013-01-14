@@ -4,11 +4,10 @@ import java.util.*;
 import jphantom.tree.*;
 import jphantom.constraints.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public class PruningSolver extends ForwardingSolver
 {
-    private Set<Type> interesting = newSet();
+    private Set<Type> interesting = new HashSet<>();
 
     public PruningSolver(TypeConstraintSolver solver) {
         super(solver);

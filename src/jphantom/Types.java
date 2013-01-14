@@ -2,7 +2,6 @@ package jphantom;
 
 import java.util.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public interface Types {
 
@@ -13,6 +12,6 @@ public interface Types {
     // Array Interfaces
 
     public static final Set<Type> ARRAY_INTERFACES = 
-        newSet(Arrays.asList(Type.getType(Cloneable.class), 
+        new HashSet<>(Arrays.asList(Type.getType(Cloneable.class), 
                              Type.getType(java.io.Serializable.class)));
 }

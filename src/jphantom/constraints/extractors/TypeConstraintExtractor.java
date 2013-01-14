@@ -14,8 +14,6 @@ import jphantom.constraints.solvers.*;
 import jphantom.ArrayType;
 import util.Command;
 
-import static util.Utils.*;
-
 public class TypeConstraintExtractor extends AbstractExtractor 
     implements Opcodes
 {
@@ -57,7 +55,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         // Local Variable Map
 
-        commands = newMap();
+        commands = new HashMap<>();
 
         if (meth.localVariables != null)
             for (LocalVariableNode local : meth.localVariables) {
@@ -97,8 +95,8 @@ public class TypeConstraintExtractor extends AbstractExtractor
     {   
         private int insnNo = 0;
         private boolean inTable;
-        private Map<CompoundValue,Integer> arrayIndices = newMap();
-        private Map<Integer,Type> activeLocalVariables = newMap();
+        private Map<CompoundValue,Integer> arrayIndices = new HashMap<>();
+        private Map<Integer,Type> activeLocalVariables = new HashMap<>();
 
         // Constructor chaining
 

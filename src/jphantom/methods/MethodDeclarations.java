@@ -7,15 +7,14 @@ import jphantom.*;
 import jphantom.tree.*;
 import jphantom.tree.graph.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 
 public class MethodDeclarations implements Types
 {
     private final ClassHierarchy hierarchy;
     private final MethodLookupTable mtable;
-    private final Map<Type,Set<MethodSignature>> pending = newMap();
-    private final Map<Type,Set<MethodSignature>> implemented = newMap();
+    private final Map<Type,Set<MethodSignature>> pending = new HashMap<>();
+    private final Map<Type,Set<MethodSignature>> implemented = new HashMap<>();
 
     public MethodDeclarations(ClassHierarchy hierarchy, MethodLookupTable mtable)
     {
@@ -36,7 +35,7 @@ public class MethodDeclarations implements Types
 
         for (Type t : topologicalOrder(hierarchy))
         {
-            Set<MethodSignature> direct = newSet(mtable.get(t));
+            Set<MethodSignature> direct = new HashSet<>(mtable.get(t));
 
             for (Iterator<MethodSignature> it = direct.iterator(); it.hasNext();)
             {
@@ -50,7 +49,7 @@ public class MethodDeclarations implements Types
             
             if (hierarchy.isInterface(t)) 
             {
-                Set<MethodSignature> closure = newSet(direct);
+                Set<MethodSignature> closure = new HashSet<>(direct);
 
                 for (Type iface : hierarchy.getInterfaces(t)) {
                     assert pending.get(iface) != null : iface;
@@ -59,8 +58,8 @@ public class MethodDeclarations implements Types
 
                 pending.put(t, closure);
             } else {
-                Set<MethodSignature> impl = newSet();
-                Set<MethodSignature> pend = newSet();
+                Set<MethodSignature> impl = new HashSet<>();
+                Set<MethodSignature> pend = new HashSet<>();
 
                 for (MethodSignature m : direct)
                     (m.isAbstract() ? pend : impl).add(m);
@@ -115,8 +114,8 @@ public class MethodDeclarations implements Types
         Node root = Node.get(OBJECT);
         DirectedGraph<Node,Edge> graph = new GraphConverter(hierarchy).convert();
         
-        List<Type> order = newList();
-        Set<Node> unconstrained = newSet();
+        List<Type> order = new ArrayList<>();
+        Set<Node> unconstrained = new HashSet<>();
         unconstrained.add(root);
         
         while (!unconstrained.isEmpty())

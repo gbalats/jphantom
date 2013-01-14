@@ -10,11 +10,9 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import static util.Utils.*;
-
 public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
 {
-    private static final Map<Type,BasicValue> values = newMap();
+    private static final Map<Type,BasicValue> values = new HashMap<>();
     protected static final BasicValue NULL_VALUE = new BasicValue(NULL_TYPE);
 
     static {

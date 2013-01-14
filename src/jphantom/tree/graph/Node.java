@@ -3,11 +3,10 @@ package jphantom.tree.graph;
 import java.util.*;
 import jphantom.tree.*;
 import org.objectweb.asm.Type;
-import static util.Utils.*;
 
 public class Node
 {
-    private static final Map<Type,Node> cache = newMap();
+    private static final Map<Type,Node> cache = new HashMap<>();
 
     private final Type type;
 

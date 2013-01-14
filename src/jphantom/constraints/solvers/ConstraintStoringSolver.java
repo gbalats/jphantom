@@ -3,11 +3,10 @@ package jphantom.constraints.solvers;
 import java.util.*;
 import jphantom.tree.ClassHierarchy;
 import jphantom.constraints.*;
-import static util.Utils.*;
 
 public class ConstraintStoringSolver extends ForwardingSolver
 {
-    private final Set<Constraint> constraints = newSet();
+    private final Set<Constraint> constraints = new HashSet<>();
     private final Set<Constraint> immutableConstraints = 
         Collections.unmodifiableSet(constraints);
 

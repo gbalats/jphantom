@@ -1,17 +1,15 @@
 package jphantom.constraints.solvers;
 
-import util.*;
 import java.util.*;
 import org.jgrapht.*;
 import org.objectweb.asm.Type;
 
-import static util.Utils.*;
 import static org.jgrapht.Graphs.*;
 import static jphantom.constraints.solvers.InterfaceSolver.GraphCycleException;
 
 public class MinClassesStrategy<V,E> implements InterfaceSolver.Strategy<V,E>
 {
-    private final Map<V,Colored<V>> colored = newMap();
+    private final Map<V,Colored<V>> colored = new HashMap<>();
     private final V root;
     private DirectedGraph<V,E> graph;
 
@@ -38,7 +36,7 @@ public class MinClassesStrategy<V,E> implements InterfaceSolver.Strategy<V,E>
     @Override
     public Set<V> classSubsetOf(DirectedGraph<V,E> graph) throws GraphCycleException
     {
-        Map<V,Colored<V>> backup = newMap(colored);
+        Map<V,Colored<V>> backup = new HashMap<>(colored);
 
         try {
             this.graph = graph;
@@ -49,7 +47,7 @@ public class MinClassesStrategy<V,E> implements InterfaceSolver.Strategy<V,E>
 
             determineTypes();
 
-            Set<V> classes = newSet();
+            Set<V> classes = new HashSet<>();
 
             for (Colored<V> v : colored.values())
                 if (v.getType() == Colored.Type.CLASS)
@@ -101,7 +99,7 @@ public class MinClassesStrategy<V,E> implements InterfaceSolver.Strategy<V,E>
 
     private void determineTypes() throws GraphCycleException
     {
-        Set<V> rootSet = newSet();
+        Set<V> rootSet = new HashSet<>();
 
         for (V v : graph.vertexSet())
         {

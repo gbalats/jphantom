@@ -1,6 +1,6 @@
 package jphantom.constraints.solvers;
 
-import util.*;
+import util.MapFactory;
 import java.util.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;

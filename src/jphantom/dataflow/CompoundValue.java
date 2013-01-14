@@ -3,7 +3,7 @@ package jphantom.dataflow;
 import java.util.*;
 import org.objectweb.asm.tree.analysis.*;
 
-import static util.Utils.*;
+import static util.Utils.union;
 import static jphantom.dataflow.TypeInterpreter.NULL_VALUE;
 
 public abstract class CompoundValue implements Value
@@ -159,7 +159,7 @@ public abstract class CompoundValue implements Value
 
     ///////////////////// Compound Value Factory /////////////////////
 
-    private static Map<BasicValue,CompoundValue> cache = newMap();
+    private static Map<BasicValue,CompoundValue> cache = new HashMap<>();
 
     public static CompoundValue fromBasicValue(BasicValue val) {
         if (val == null)
