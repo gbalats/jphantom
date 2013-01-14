@@ -21,8 +21,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.signature.*;
 
@@ -142,10 +140,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                     // Chain a method-adder adapter
 
-                    MethodNode method = new MethodNode(access, name, desc, null, null);
-                    
                     assert tr.top != null;
-                    tr.top = new MethodAdder(tr.top, method);
+                    tr.top = new MethodAdder(tr.top, access, name, desc);
 
                 } catch(IllegalTransitionException exc) {
 
@@ -226,11 +222,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                         .getEventSequence(name, phantom).moveTo(event).getCurrentAccess();
 
                     // Chain a field-adder adapter
-                    
-                    FieldNode field = new FieldNode(access, name, desc, null, null);
 
                     assert tr.top != null;
-                    tr.top = new FieldAdder(tr.top, field);
+                    tr.top = new FieldAdder(tr.top, access, name, desc);
 
                 } catch(IllegalTransitionException exc) {
 

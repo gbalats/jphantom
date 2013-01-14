@@ -2,29 +2,44 @@ package jphantom.adapters;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import jphantom.methods.MethodSignature;
 import jphantom.exc.IllegalBytecodeException;
 
 public class MethodAdder extends ClassVisitor implements Opcodes
 {
-    private final MethodNode mn;
+    private final int mAcc;
+    private final String mName;
+    private final String mDesc;
+    private final String[] mExc;
     private boolean isMethodPresent;
     private boolean iface;
 
-    public MethodAdder(ClassVisitor cv, MethodNode mn)
+    public MethodAdder(ClassVisitor cv, MethodSignature m) {
+        this(cv, m.getAccess(), m.getName(), m.getDescriptor(), 
+             m.getExceptions().toArray(new String[0]));
+    }
+
+    public MethodAdder(ClassVisitor cv, int mAcc, String mName, String mDesc) {
+        this(cv, mAcc, mName, mDesc, null);
+    }
+
+    public MethodAdder(
+        ClassVisitor cv, int mAcc, String mName, String mDesc, String[] mExc)
     {
         super(ASM4, cv);
-        this.mn = mn;
-        // mn.visitMaxs(0, 0);
+        this.mAcc = mAcc;
+        this.mName = mName;
+        this.mDesc = mDesc;
+        this.mExc = mExc;
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, 
                                      String signature, String[] exceptions)
     {
-        if (name.equals(mn.name) && desc.equals(mn.desc))
+        if (name.equals(mName) && desc.equals(mDesc))
             isMethodPresent = true;
         return super.visitMethod(access, name, desc, signature, exceptions);
     }
@@ -39,41 +54,45 @@ public class MethodAdder extends ClassVisitor implements Opcodes
 
     @Override
     public void visitEnd() {
-        if (!isMethodPresent)
+        if (!isMethodPresent && cv != null)
         {
-            boolean isStatic = (mn.access & ACC_STATIC) != 0;
-            boolean isAbstract = (mn.access & ACC_ABSTRACT) != 0;
+            boolean isStatic = (mAcc & ACC_STATIC) != 0;
+            boolean isAbstract = (mAcc & ACC_ABSTRACT) != 0;
 
-            // Add method body (only for classes)
-            if (!iface && !isAbstract)
-            {
-                int maxStack = 2;
-                int maxLocals = 1 + Type.getArgumentTypes(mn.desc).length;
+            MethodVisitor mv = cv.visitMethod(
+                mAcc, mName, mDesc, null, mExc);
 
-                mn.visitCode();
+            if (mv != null) {
+                // Add method body (only for classes)
+                if (!iface && !isAbstract)
+                {
+                    int maxStack = 2;
+                    int maxLocals = 1 + Type.getArgumentTypes(mDesc).length;
+                
+                    mv.visitCode();
 
-                if (!isStatic) {
-                    mn.visitVarInsn(ALOAD, 0); // this
-                    maxStack++;
-                    maxLocals++;
+                    if (!isStatic) {
+                        mv.visitVarInsn(ALOAD, 0); // this
+                        maxStack++;
+                        maxLocals++;
+                    }
+
+                    mv.visitInsn(NOP);
+
+                    String exc = Type.getInternalName(
+                        UnsupportedOperationException.class);
+
+                    String desc = Type.getMethodType(Type.VOID_TYPE)
+                        .getDescriptor();
+
+                    mv.visitTypeInsn(NEW, exc);
+                    mv.visitInsn(DUP);
+                    mv.visitMethodInsn(INVOKESPECIAL, exc, "<init>", desc);
+                    mv.visitInsn(ATHROW);
+                    mv.visitMaxs(maxStack, maxLocals);
                 }
-
-                mn.visitInsn(NOP);
-
-                String exc = Type.getInternalName(
-                    UnsupportedOperationException.class);
-
-                String desc = Type.getMethodType(Type.VOID_TYPE)
-                    .getDescriptor();
-
-                mn.visitTypeInsn(NEW, exc);
-                mn.visitInsn(DUP);
-                mn.visitMethodInsn(INVOKESPECIAL, exc, "<init>", desc);
-                mn.visitInsn(ATHROW);
-                mn.visitMaxs(maxStack, maxLocals);
-                mn.visitEnd();
+                mv.visitEnd();
             }
-            mn.accept(cv);
         }
         super.visitEnd();
     }

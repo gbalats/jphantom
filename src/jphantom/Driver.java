@@ -216,18 +216,10 @@ public class Driver implements StandardTypes
 
                 // Chain a method-adder adapter
 
-                MethodNode method = new MethodNode(
-                    m.getAccess(), 
-                    m.getName(), 
-                    m.getDescriptor(), 
-                    null, 
-                    m.getExceptions().toArray(new String[0])
-                );
-
                 File outFile = Phantoms.locationOf(outDir, p);
 
                 ClassVisitor cw = new ClassWriter(0);                
-                ClassVisitor cv = new MethodAdder(cw, method);
+                ClassVisitor cv = new MethodAdder(cw, m);
                 ClassReader  cr = new ClassReader(new FileInputStream(outFile));
                 
                 cr.accept(cv, 0);
