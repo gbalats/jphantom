@@ -54,9 +54,11 @@ public class PhantomAdder extends SignatureVisitor implements Opcodes
             } catch (ClassNotFoundException ign) {}
 
             /* Add to phantom classes */
-            if (!phantoms.containsKey(objType))
+            if (!phantoms.contains(objType))
             {
-                phantoms.putDefault(objType);
+                // Lazy implementation will provide a default value
+                phantoms.getTransformer(objType);
+
                 logger.info("Phantom Class \"{}\" detected", objType.getClassName());
             }
         } while (false);

@@ -88,7 +88,7 @@ public class Driver implements Types
         // Sanity check
 
         for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
-            assert phantoms.containsKey(unknown);
+            assert phantoms.contains(unknown);
 
         this.hierarchy = hierarchy;
     }
@@ -145,7 +145,8 @@ public class Driver implements Types
         fillLookupTable(solution);
 
         // Add missing methods
-        addMissingMethods(solution, new MethodDeclarations(solution, phantoms.mtable));
+        addMissingMethods(
+            solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
     }
 
     private void fillLookupTable(ClassHierarchy solution) throws IOException
@@ -153,10 +154,10 @@ public class Driver implements Types
         for (Type t : solution)
         {
             // Phantom Type
-            if (phantoms.containsKey(t))
+            if (phantoms.contains(t))
                 continue;
 
-            ClassVisitor visitor = phantoms.mtable.new CachingAdapter();
+            ClassVisitor visitor = phantoms.getLookupTable().new CachingAdapter();
 
             // Input Type
             if (nodes.containsKey(t)) {
@@ -176,10 +177,10 @@ public class Driver implements Types
             if (hierarchy.contains(p))
                 continue;
 
-            assert phantoms.containsKey(p) : p;
+            assert phantoms.contains(p) : p;
 
             // Get top class visitor
-            Transformer tr = phantoms.get(p);
+            Transformer tr = phantoms.getTransformer(p);
 
             assert tr.top != null;
 
@@ -198,7 +199,7 @@ public class Driver implements Types
     private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations)
         throws IOException
     {
-        for (Type p : phantoms.keySet())
+        for (Type p : phantoms)
         {
             Set<MethodSignature> pending = declarations.getPending(p);
 

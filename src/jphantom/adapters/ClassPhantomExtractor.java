@@ -122,7 +122,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Get top class visitor
 
-                Transformer tr = phantoms.get(phantom);
+                assert phantoms.contains(phantom) : phantom;
+
+                Transformer tr = phantoms.getTransformer(phantom);
 
                 // Construct new method access context
 
@@ -205,7 +207,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Get top class visitor
 
-                Transformer tr = phantoms.get(phantom);
+                assert phantoms.contains(phantom) : phantom;
+
+                Transformer tr = phantoms.getTransformer(phantom);
 
                 // Construct new field access context
 

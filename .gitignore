@@ -1,4 +1,5 @@
 build/*
 docs/*
 out/*
+out.jar
 testing/*

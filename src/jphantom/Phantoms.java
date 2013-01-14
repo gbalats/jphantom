@@ -2,11 +2,11 @@ package jphantom;
 
 import java.io.*;
 import java.util.*;
-import util.ForwardingMap;
+import com.google.common.collect.ForwardingSet;
 import org.objectweb.asm.Type;
 import jphantom.methods.MethodLookupTable;
 
-public class Phantoms extends ForwardingMap<Type,Transformer>
+public class Phantoms extends ForwardingSet<Type>
 {
     /////////////////// Singleton ///////////////////
 
@@ -15,32 +15,42 @@ public class Phantoms extends ForwardingMap<Type,Transformer>
 
     ////////////////// Constructor //////////////////
 
-    private Phantoms() {
-        super(new HashMap<Type,Transformer>());
-    }
+    private Phantoms() {}
 
     ////////////////////  Fields ////////////////////
 
-    final MethodLookupTable mtable = new MethodLookupTable(); // TODO: private
+    private final Map<Type,Transformer> transformers = new HashMap<>();
+
+    private final MethodLookupTable mtable = new MethodLookupTable();
 
     //////////////////// Methods ////////////////////
 
-    public Transformer putDefault(Type key)
-    {
-        if (containsKey(key))
-            throw new IllegalStateException(key + " is already mapped to a value");
+    @Override
+    protected Set<Type> delegate() {
+        return transformers.keySet();
+    }
 
-        Transformer tr = new Transformer(key);
-        tr.top = mtable.new CachingAdapter(tr.top);
-        put(key, tr);
-        return null;
+    public Transformer getTransformer(final Type type)
+    {
+        if (!transformers.containsKey(type))
+        {
+            Transformer tr = new Transformer(type);
+
+            tr.top = mtable.new CachingAdapter(tr.top);
+            transformers.put(type, tr);
+        }
+        return transformers.get(type);
+    }
+
+    public MethodLookupTable getLookupTable() {
+        return mtable;
     }
 
     public List<File> generateFiles(File outDir) throws IOException
     {
         List<File> files = new LinkedList<>();
 
-        for (Map.Entry<Type,Transformer> e : entrySet())
+        for (Map.Entry<Type,Transformer> e : transformers.entrySet())
         {
             Type key = e.getKey();
             byte[] bytes = e.getValue().transform();
