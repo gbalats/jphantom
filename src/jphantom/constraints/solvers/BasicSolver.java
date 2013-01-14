@@ -359,7 +359,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         {
             // Remove constraints from fixed source vertices
 
-            constraints = new LinkedList<Pair<Type,Type>>();
+            constraints = new LinkedList<>();
 
             for (SubtypeConstraint e : new HashSet<>(graph.edgeSet()))
             {
