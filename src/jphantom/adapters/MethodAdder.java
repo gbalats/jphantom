@@ -67,8 +67,11 @@ public class MethodAdder extends ClassVisitor implements Opcodes
                 if (!iface && !isAbstract)
                 {
                     int maxStack = 2;
-                    int maxLocals = 1 + Type.getArgumentTypes(mDesc).length;
-                
+                    int maxLocals = 0;
+
+                    for (Type arg : Type.getArgumentTypes(mDesc))
+                        maxLocals += arg.getSize();
+
                     mv.visitCode();
 
                     if (!isStatic) {
