@@ -119,6 +119,8 @@ public class Driver implements Types
             c.accept(solver);
         for (Constraint c : MethodAccessStateMachine.v().getConstraints())
             c.accept(solver);
+        for (Constraint c : ClassAccessStateMachine.v().getConstraints())
+            c.accept(solver);
 
         for (Constraint c : solver.getConstraints())
             logger.info("Constraint: {}", c);

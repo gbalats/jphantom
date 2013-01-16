@@ -4,6 +4,7 @@ import jphantom.Phantoms;
 import jphantom.Transformer;
 import jphantom.access.*;
 import jphantom.tree.*;
+import jphantom.constraints.*;
 import jphantom.exc.IllegalBytecodeException;
 
 import java.io.DataOutputStream;
@@ -93,6 +94,46 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         mdesc = desc;
         return new MethodPhantomExtractor(
             super.visitMethod(access, name, desc, signature, exceptions));
+    }
+
+    @Override
+    public void visitInnerClass(
+        final String name, 
+        final String outerName, 
+        final String innerName, 
+        final int access)
+    {
+        Type inner = Type.getObjectType(name);
+
+        new SignatureReader("" + inner).acceptType(sv);
+
+        if (outerName != null)
+            new SignatureReader("" + Type.getObjectType(outerName)).acceptType(sv);
+
+        do {
+            if (hierarchy.contains(inner))
+                break;
+
+            assert phantoms.contains(inner) : inner;
+        
+            Transformer tr = phantoms.getTransformer(inner);
+
+            ClassAccessEvent event = new ClassAccessEvent.Builder()
+                .setAccess(access)
+                .build();
+
+            ClassAccessStateMachine.v()
+                .getEventSequence(inner).moveTo(event).getCurrentAccess();
+
+            // Chain an access adapter
+
+            assert tr.top != null;
+            // tr.top = new AccessAdapter(tr.top, access);
+
+            // inner class attributes are not checked to be
+            // consistent with the corresponding class file
+                    
+        } while(false);
     }
 
     private class MethodPhantomExtractor extends MethodVisitor
