@@ -45,7 +45,10 @@ public class PhantomAdder extends SignatureVisitor implements Opcodes
 
             /* Check if class can be resolved in the system (e.g. java.util) */
             try {
-                Class<?> clazz = Class.forName(objType.getClassName());
+                // Use the bootstrap loader, so that it works for types
+                // that happen to be included in jphantom itself
+
+                Class<?> clazz = Class.forName(objType.getClassName(), false, null);
 
                 // Import from default class loader
                 ClassHierarchies.loadSystemType(hierarchy, clazz);

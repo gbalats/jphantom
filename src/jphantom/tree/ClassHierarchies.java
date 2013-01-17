@@ -16,7 +16,7 @@ public class ClassHierarchies implements Opcodes, Types
 
     public static void loadSystemType(ClassHierarchy hierarchy, Class<?> clazz)
     {
-        new Importer(hierarchy).execute(Type.getType(clazz));
+        new Importer(hierarchy, clazz.getClassLoader()).execute(Type.getType(clazz));
     }
 
     public static Set<Type> unknownTypes(ClassHierarchy hierarchy)

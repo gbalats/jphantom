@@ -3,6 +3,7 @@ package jphantom.tree.closure;
 import java.util.*;
 import jphantom.tree.*;
 import jphantom.tree.graph.*;
+import jphantom.util.BootstrapClassLoader;
 import org.objectweb.asm.Type;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -22,7 +23,7 @@ public class CopyingSnapshot extends PseudoSnapshot
         super(new IncrementalClassHierarchy(other));
 
         // Try to add missing types
-        new Importer(hierarchy).execute();
+        new Importer(hierarchy, BootstrapClassLoader.v()).execute();
 
         // Create graph representation
         this.graph = new GraphConverter(hierarchy).convert();

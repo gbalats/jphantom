@@ -15,8 +15,8 @@ public class Importer implements Command, Types
         this.source = source;
     }
 
-    public Importer(ClassHierarchy target) {
-        this(target, SystemClassHierarchy.getInstance());
+    public Importer(ClassHierarchy target, ClassLoader loader) {
+        this(target, SystemClassHierarchy.getInstance(loader));
     }
 
     protected ClassHierarchy getTarget() {
@@ -30,17 +30,21 @@ public class Importer implements Command, Types
     @Override
     public void execute()
     {
+        List<Type> copy = new LinkedList<>();
+
         for (Type i : target)
+            copy.add(i);
+
+        for (Type i : copy)
         {
-            Set<Type> types = new HashSet<>(target.getInterfaces(i));
+            Set<Type> supertypes = new HashSet<>(target.getInterfaces(i));
             Type sc = target.getSuperclass(i);
             
             if (sc != null)
-                types.add(sc);
+                supertypes.add(sc);
 
-            for (Type j : types)
-                if (!target.contains(j) && source.contains(j))
-                    importFrom(j);
+            for (Type j : supertypes)
+                importFrom(j);
         }
     }
 

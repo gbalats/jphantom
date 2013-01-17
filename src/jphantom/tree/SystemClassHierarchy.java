@@ -5,12 +5,22 @@ import org.objectweb.asm.Type;
 
 public class SystemClassHierarchy extends AbstractClassHierarchy
 {
-    private static final SystemClassHierarchy INSTANCE = 
-        new SystemClassHierarchy();
+    private static final Map<ClassLoader,SystemClassHierarchy> systemHier = 
+        new HashMap<>();
 
-    private SystemClassHierarchy() {}
+    private SystemClassHierarchy(ClassLoader loader) {
+        this.loader = loader;
+    }
 
-    public static SystemClassHierarchy getInstance() { return INSTANCE; }
+    private final ClassLoader loader;
+
+    public static SystemClassHierarchy getInstance(ClassLoader loader)
+    {
+        if (!systemHier.containsKey(loader))
+            systemHier.put(loader, new SystemClassHierarchy(loader));
+
+        return systemHier.get(loader);
+    }
 
     @Override
     public void addClass(Type clazz, Type superclass, Type[] interfaces)
@@ -32,7 +42,7 @@ public class SystemClassHierarchy extends AbstractClassHierarchy
     @Override
     public boolean contains(Type obj) {
         try {
-            Class.forName(obj.getClassName());
+            Class.forName(obj.getClassName(), false, loader);
         } catch (ClassNotFoundException exc) {
             return false;
         }
@@ -62,7 +72,7 @@ public class SystemClassHierarchy extends AbstractClassHierarchy
     private Class<?> asClass(Type obj)
     {
         try {
-            return Class.forName(obj.getClassName());
+            return Class.forName(obj.getClassName(), false, loader);
         } catch (ClassNotFoundException exc) {
             throw new IllegalArgumentException();
         }
