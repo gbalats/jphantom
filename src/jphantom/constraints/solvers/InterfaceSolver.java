@@ -139,7 +139,7 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
         for (V v : graph.vertexSet())
             if (classes.contains(v))
                 assert classSolver.getSolution().containsKey(v) || 
-                       v.equals(root) : v;
+                    v.equals(root) : v;
             else
                 assert ifaceSolver.getSolution().containsKey(v) : v;
 

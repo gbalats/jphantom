@@ -197,7 +197,79 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         if (!initialized)
             throw new IllegalStateException();
 
-        ifaceSolver = new RecursiveSolver(graph, minimize).solve();
+        Set<SubtypeConstraint> fixedSource = new HashSet<>();
+        Map<Type,List<Type>> domains = new HashMap<>();
+
+        for (SubtypeConstraint e : new HashSet<>(graph.edgeSet()))
+        {
+            Type source = graph.getEdgeSource(e);
+            Type target = graph.getEdgeTarget(e);
+
+            // Skip phantom-source edges
+            if (!hierarchy.contains(source))
+                continue;
+
+            // Leave direct edges
+            if (hierarchy.getInterfaces(source).contains(target))
+                continue;
+
+            try {
+                // Check if edge is already satisfied
+                if (!closure.isSubtypeOf(source, target))
+                    throw new UnsatisfiableStateException();
+
+                // Remove transitively satisfied path-edge
+                graph.removeEdge(source, target);
+            } catch (IncompleteSupertypesException ign) {
+                // Add path-edge since it can be satisfied eventually
+                fixedSource.add(e);
+
+                // Compute Projections
+                try {
+                    // Must include all supertypes, including classes
+                    Set<Type> supertypes = closure.getAllSupertypes(source);
+
+                    // No phantom projections => insolvable constraint
+                    throw new InsolvableConstraintException(e);
+
+                } catch (IncompleteSupertypesException exc) {
+                    List<Type> projections = new ArrayList<>();
+                    
+                    assert !exc.getSupertypes().isEmpty();
+
+                    for (Type t : exc.getSupertypes())
+                        if (!hierarchy.contains(t))
+                            projections.add(t);
+
+                    // Phantom superclass might be missing, if no other interface
+                    // constraints were associated with it.
+                    // We can just add the relevant vertex into the iface-graph.
+                    for (Type t : projections)
+                        if (!graph.containsVertex(t)) {
+                            graph.addVertex(t);
+                            break;
+                        }
+
+                    for (Type t : projections)
+                        assert graph.containsVertex(t) : t;
+                    
+                    domains.put(source, projections);
+                }
+            }
+        }
+
+        ifaceSolver = new LayeringSolver<Type,SubtypeConstraint>(graph, fixedSource, domains, minimize) {
+            @Override 
+            protected boolean removableEdge(Type source, Type target)
+            {
+                if (hierarchy.contains(source) && 
+                    hierarchy.getInterfaces(source).contains(target))
+                    return false;
+                return super.removableEdge(source, target);
+            }
+        }.solve();
+        
+        // ifaceSolver = new RecursiveSolver(graph, minimize).solve();
     }
 
     /////////////////////// Solution Synthesis ///////////////////////
@@ -424,7 +496,6 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
             
             // Try every value in the domain
             for (Type t : domain) {
-                // TODO: fix
                 if (!graph.containsVertex(t))
                     graph.addVertex(t);
                 graph.addEdge(t, target);             
