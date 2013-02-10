@@ -175,14 +175,6 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
                     int max = getFrame().getLocals();
 
-                    // This may fail if there are two different
-                    // compound values of the same array type
-                    // represented by the same reference, and 
-                    // only one has the correct declared type.
-                    // If a local with the wrong index is picked
-                    // first due to sharing compound value 
-                    // references, an error may occur by adding
-                    // a wrong constraint.
                     for (int i = 0; i < max; i++) {
                         if (arrayObj != getFrame().getLocal(i))
                             continue;

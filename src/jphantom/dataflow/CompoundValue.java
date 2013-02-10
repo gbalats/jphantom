@@ -168,14 +168,8 @@ public abstract class CompoundValue implements Value
 
     ///////////////////// Compound Value Factory /////////////////////
 
-    private static Map<BasicValue,CompoundValue> cache = new HashMap<>();
-
     public static CompoundValue fromBasicValue(BasicValue val) {
-        if (val == null)
-            return null;
-        if (!cache.containsKey(val))
-            cache.put(val, new SimpleCompoundValue(val));
-        return cache.get(val);
+        return val == null ? null : new SimpleCompoundValue(val);
     }
 
     public static CompoundValue fromMerge(CompoundValue left, CompoundValue right)
