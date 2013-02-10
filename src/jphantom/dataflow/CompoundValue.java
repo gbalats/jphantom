@@ -4,6 +4,7 @@ import java.util.*;
 import org.objectweb.asm.tree.analysis.*;
 
 import static util.Utils.union;
+import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static jphantom.dataflow.TypeInterpreter.NULL_VALUE;
 
 public abstract class CompoundValue implements Value
@@ -110,6 +111,14 @@ public abstract class CompoundValue implements Value
             if (!right.isReference())
                 throw new IllegalArgumentException(right.toString());
 
+            // TODO: make sure that the following constraint is valid
+            for ( BasicValue v : uv )
+                if (v == UNINITIALIZED_VALUE)
+                    throw new IllegalArgumentException(
+                        "Uninitialized value participates in a merge!!!");
+                else 
+                    assert v.getType() != null;
+
             // Must be strictly increasing
 
             assert uv.size() > 1;
@@ -174,8 +183,19 @@ public abstract class CompoundValue implements Value
         if (left.equals(right))
             return left;
 
-        if (!left.isReference() || !right.isReference())
-            return fromBasicValue(BasicValue.UNINITIALIZED_VALUE);
+        if (!left.isReference() || !right.isReference()) {
+            do {
+                if (left.equals(UNINITIALIZED_VALUE))
+                    break;
+
+                if (right.equals(UNINITIALIZED_VALUE))
+                    break;
+
+                // TODO: check why this is not valid
+                // throw new MergingException(left, right);
+            } while (false);
+            return fromBasicValue(UNINITIALIZED_VALUE);
+        }
 
         if (left.isEmpty() || right.contains(left))
             return right;
@@ -184,6 +204,20 @@ public abstract class CompoundValue implements Value
             return left;
 
         return new MergedCompoundValue(left, right);
+    }
+
+    private static class MergingException extends RuntimeException {
+        protected final static long serialVersionUID = 8347563458345634534L;
+
+        private final CompoundValue left;
+        private final CompoundValue right;
+
+        MergingException(CompoundValue left, CompoundValue right)
+        {
+            super();
+            this.left = left;
+            this.right = right;
+        }
     }
 }
 

@@ -6,7 +6,8 @@ import jphantom.tree.*;
 import jphantom.tree.closure.*;
 import jphantom.conversions.*;
 import jphantom.constraints.solvers.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.objectweb.asm.*;
 
 public abstract class AbstractExtractor implements ConversionVisitor, Types
@@ -14,6 +15,9 @@ public abstract class AbstractExtractor implements ConversionVisitor, Types
     protected final TypeConstraintSolver solver;
     protected final ClassHierarchy hierarchy;
     private final ClassHierarchy.Snapshot closure;
+
+    private final static Logger logger = 
+        LoggerFactory.getLogger(AbstractExtractor.class);
 
     public AbstractExtractor(TypeConstraintSolver solver)
     {
@@ -79,6 +83,7 @@ public abstract class AbstractExtractor implements ConversionVisitor, Types
 
         // Add constraint to underlying solver
         conv.asConstraint().accept(solver);
+        logger.debug("Adding constaint: {}", conv.asConstraint());
         return;
     }
 }

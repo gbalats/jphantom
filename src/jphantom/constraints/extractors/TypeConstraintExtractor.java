@@ -5,7 +5,8 @@ import java.util.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jphantom.tree.*;
 import jphantom.exc.*;
 import jphantom.dataflow.*;
@@ -13,11 +14,14 @@ import jphantom.conversions.*;
 import jphantom.constraints.solvers.*;
 import jphantom.ArrayType;
 import util.Command;
+import static org.objectweb.asm.util.Printer.OPCODES;
+import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 
 public class TypeConstraintExtractor extends AbstractExtractor 
     implements Opcodes
 {
-    private static final boolean DEBUG = false;
+    private final static Logger logger = 
+        LoggerFactory.getLogger(TypeConstraintExtractor.class);
 
     private final Analyzer<CompoundValue> analyzer;
     private final Interpreter<CompoundValue> interpreter;
@@ -33,12 +37,10 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
     public final void visit(ClassNode node) throws AnalyzerException {
         cName = node.name;
-        if (DEBUG)
-            System.out.println("... analyzing " + cName);
+        logger.debug("... analyzing class {}", cName);
 
         for (MethodNode meth : node.methods) {
-            if (DEBUG)
-                System.out.println("  ... Method: " + meth.name);
+            logger.debug("  ... Method: {} {}", meth.name, meth.desc);
             visit(meth);
         }
     }
@@ -81,22 +83,23 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         try {
             meth.accept(mv);
-        } catch (InsolvableConstraintException e) {
-            System.err.println("Error while analyzing method \"" + meth.name + 
-                               "\" of class \"" + cName + "\": insn " + mv.insnNo);
-            if (DEBUG)
+        } catch (Throwable e) {
+
+            if (logger.isTraceEnabled())
                 for (int i = 0; i <= mv.insnNo; i++)
-                    System.err.println("Frame at point:" + i + "\n" + analyzer.getFrames()[i]);
-            throw e;
+                    logger.trace("Frame at point: {}\n{}", i, analyzer.getFrames()[i]);
+            throw new IllegalBytecodeException.Builder(cName)
+                .message("Instruction: " + mv.insnNo)
+                .method(meth.name, meth.desc).cause(e).build();
         }
     }
 
     public class MethodConstraintExtractor extends MethodVisitor
     {   
         private int insnNo = 0;
-        private boolean inTable;
-        private Map<CompoundValue,Integer> arrayIndices = new HashMap<>();
-        private Map<Integer,Type> activeLocalVariables = new HashMap<>();
+        private Map<Integer,Type> declarations = new HashMap<>();
+        private Map<CompoundValue,Integer> arrayIndices = 
+            new IdentityHashMap<>();
 
         // Constructor chaining
 
@@ -112,6 +115,15 @@ public class TypeConstraintExtractor extends AbstractExtractor
             this(null);
         }
 
+        private void logInstruction(int opcode) {
+            logInstruction(OPCODES[opcode]);
+        }
+
+        private void logInstruction(String instr) {
+            logger.trace("Instruction ({}): {} ", instr, insnNo);
+        }
+
+
         private Frame<CompoundValue> getFrame() throws UnreachableCodeException
         {
             Frame<CompoundValue> frame = analyzer.getFrames()[insnNo];
@@ -122,35 +134,30 @@ public class TypeConstraintExtractor extends AbstractExtractor
             return frame;
         }
 
+        /** Returns the i-th element of the stack at this point, in 
+          * reverse order. That is, {@code getStack(0)} will return
+          * the last element that was inserted in the stack. 
+          */
         private CompoundValue getStack(int i) throws UnreachableCodeException
         {
             int top = getFrame().getStackSize();
             return getFrame().getStack(top -1 -i);
         }
 
-        
-        private CompoundValue getLocal(int i) throws UnreachableCodeException
+        private CompoundValue getLocal(int i)
+            throws UnreachableCodeException
         {
-            inTable = false;
-
-            // Local Variable Table contains exact type
-            if (activeLocalVariables.containsKey(i)) {
-                inTable = true;
-                return CompoundValue.fromBasicValue(
-                    TypeInterpreter.getValue(
-                        activeLocalVariables.get(i)
-                    )
-                );
-            }
             int max = getFrame().getLocals();
             return i < max ? getFrame().getLocal(i) : null;
         }
+
 
         ////////////////////// Instructions //////////////////////
 
         @Override
         public void visitInsn(int opcode)
         {
+            logInstruction(opcode);
             try {
                 switch (opcode) {
                 case ATHROW:
@@ -165,29 +172,40 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     addConstraint(getStack(0), returnType);
                     break;
                 case AASTORE:
-                    do {
-                        CompoundValue val = getStack(0);
-                        CompoundValue arrayObj = getStack(2);
-                        Type declaredType;
-                    
-                        if (arrayIndices.containsKey(arrayObj)) {
-                            // Stored in local variable
-                            declaredType = getLocal(arrayIndices.get(arrayObj)).
-                                asBasicValue().getType();
-                        } else if (arrayObj.asBasicValue() != null) {
-                            // Single value
-                            declaredType = arrayObj.asBasicValue().getType();
-                        
-                            if (declaredType == null)
-                                break;
+                    CompoundValue val = getStack(0);
+                    CompoundValue arrayObj = getStack(2);
 
-                            if (declaredType.equals(NULL_TYPE))
-                                break;
-                        } else { break; }
+                    // if (arrayIndices.containsKey(arrayObj)) {
+                    //     // Index at local variable table
+                    //     int index = arrayIndices.get(arrayObj);
+                    //     assert getLocal(index) == arrayObj;
+                        
+                    //     if (declarations.containsKey(index)) {
+                    //         Type declaredType = declarations.get(index);
+
+                    //         assert declaredType != null;
+                    //         assert declaredType.getSort() == Type.ARRAY;
+
+                    //         // Elements must be of the appropriate type
+                    //         addConstraint(val, ArrayType.elementOf(declaredType));
+                    //     }
+                    // }
+
+                    // if (arrayObj.hasDeclaration()) {
+                    //     TypeDeclaration decl = arrayObj.getDeclaration();
+                        
+                    //     if (decl.inScope()) {
+                    //         Type declaredType = decl.declaredType();
+                            
+                    //         assert declaredType != null;
+                    //         assert declaredType.getSort() == Type.ARRAY;;
+
+                    //         // Elements must be of the appropriate type
+                    //         addConstraint(val, ArrayType.elementOf(declaredType));
+                    //     }
+                    // }
                     
-                        // Elements must be of the appropriate type
-                        addConstraint(val, ArrayType.elementOf(declaredType));
-                    } while(false);
+                    System.out.println("Active: " + declarations);
                     break;
                 default:
                     break;
@@ -200,6 +218,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         @Override
         public void visitIntInsn(int opcode, int operand) {
+            logInstruction(opcode);
             insnNo++;
             super.visitIntInsn(opcode, operand);
         }
@@ -207,22 +226,31 @@ public class TypeConstraintExtractor extends AbstractExtractor
         @Override
         public void visitVarInsn(int opcode, int var)
         {
+            logInstruction(opcode);
             try {
                 switch(opcode) {
                 case ASTORE:
-                    CompoundValue obj = getStack(0);
+                    System.out.println("Variable No: " + var);
+                    System.out.println("Active: " + declarations);
+
                     CompoundValue val = getLocal(var);
+                    CompoundValue obj = getStack(0);
 
-                    if (inTable) {
-                        Type declaredType = val.asBasicValue().getType(); 
+                    if (declarations.containsKey(var))
+                    {
+                        Type declaredType = declarations.get(var);
 
+                        assert declaredType != null;
+                        System.out.println("(exact match) " + declaredType);
+
+                        // Found local variable in local variable table
                         addConstraint(obj, declaredType);
-                    
-                        // Store array index
-                        if (declaredType.getSort() == Type.ARRAY)
-                            arrayIndices.put(obj, var);
-                        else
-                            arrayIndices.remove(obj);
+
+                        // // Store array index
+                        // if (declaredType.getSort() == Type.ARRAY)
+                        //     arrayIndices.put(obj, var);
+                        // else
+                        //     arrayIndices.remove(obj);
                     }
                     break;
                 default:
@@ -236,6 +264,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         @Override
         public void visitTypeInsn(int opcode, String type) {
+            logInstruction(opcode);
             insnNo++;
             super.visitTypeInsn(opcode, type);
         }
@@ -248,6 +277,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             String desc)
         {
             CompoundValue obj, val;
+            logInstruction(opcode);
 
             try {                
                 switch (opcode) {
@@ -280,6 +310,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             String name, 
             String desc)
         {
+            logInstruction(opcode);
             try {
                 Type[] args = Type.getArgumentTypes(desc);
                 int pos = 0; // stack counter
@@ -324,12 +355,14 @@ public class TypeConstraintExtractor extends AbstractExtractor
             Handle bsm,
             Object... bsmArgs)
         {
+            logInstruction(INVOKEDYNAMIC);
             insnNo++;
             super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         }
 
         @Override
         public void visitJumpInsn(int opcode, Label label) {
+            logInstruction(opcode);
             insnNo++;
             super.visitJumpInsn(opcode, label);
         }
@@ -337,16 +370,35 @@ public class TypeConstraintExtractor extends AbstractExtractor
         @Override
         public void visitLabel(Label label) {
             if (commands.containsKey(label)) {
-                for (Command command : commands.get(label))
+                for (Command command : commands.get(label)) {
                     command.execute();
+                    logger.trace("Label {}: {}", insnNo, command);
+                }
                 commands.remove(label);
             }
+
+            System.out.println("Active: " + declarations);
+
+            // Extract relevant type constraints
+            for (Map.Entry<Integer,Type> entry : declarations.entrySet())
+            {
+                int i = entry.getKey();
+                Type declared = entry.getValue();
+
+                try {
+                    CompoundValue val = getLocal(i);
+                    System.out.println("Compound Value: " + val + " " + i);
+                    addConstraint(val, declared);
+                } catch (UnreachableCodeException ign) {}
+            }
+
             insnNo++;
             super.visitLabel(label);
         }
 
         @Override
         public void visitLdcInsn(Object cst) {
+            logInstruction(LDC);
             insnNo++;
             super.visitLdcInsn(cst);
         }
@@ -354,6 +406,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         @Override
         public void visitIincInsn(int var, int increment)
         {
+            logInstruction(IINC);
             insnNo++;
             super.visitIincInsn(var, increment);
         }
@@ -365,6 +418,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             Label dflt,
             Label... labels)
         {
+            logInstruction(TABLESWITCH);
             insnNo++;
             super.visitTableSwitchInsn(min, max, dflt, labels);
         }
@@ -375,6 +429,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             int[] keys,
             Label[] labels)
         {
+            logInstruction(LOOKUPSWITCH);
             insnNo++;
             super.visitLookupSwitchInsn(dflt, keys, labels);
         }
@@ -382,6 +437,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         @Override
         public void visitMultiANewArrayInsn(String desc, int dims)
         {
+            logInstruction(MULTIANEWARRAY);
             insnNo++;
             super.visitMultiANewArrayInsn(desc, dims);
         }
@@ -394,12 +450,14 @@ public class TypeConstraintExtractor extends AbstractExtractor
             int nStack, 
             Object[] stack) 
         {
+            logInstruction("frame");
             insnNo++;
             super.visitFrame(type, nLocal, local, nStack, stack);
         }
 
         @Override
         public void visitLineNumber(int line, Label start) {
+            logInstruction("line");
             insnNo++;
             super.visitLineNumber(line, start);
         }
@@ -434,15 +492,24 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         protected void addConstraint(CompoundValue subtypes, Type supertype)
         {
-            for (BasicValue val : subtypes.values()) {
-                Type subtype = val.getType();
-
+            for (BasicValue subtype : subtypes.values())
                 addConstraint(subtype, supertype);
-            }            
+        }
+
+        protected void addConstraint(BasicValue subtype, Type supertype)
+        {
+            if (!subtype.equals(UNINITIALIZED_VALUE))
+                addConstraint(subtype.getType(), supertype);
         }
 
         protected void addConstraint(Type subtype, Type supertype)
         {
+            if (subtype == null)
+                throw new IllegalArgumentException("Null subtype");
+
+            if (supertype == null)
+                throw new IllegalArgumentException("Null supertype");
+
             Conversions.getAssignmentConversion(subtype, supertype).
                 accept(TypeConstraintExtractor.this);
         }
@@ -470,8 +537,8 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
             @Override
             public void execute() {
-                assert !activeLocalVariables.containsKey(index) : name;
-                activeLocalVariables.put(index, type);
+                assert !declarations.containsKey(index) : name;
+                declarations.put(index, type);
             }
         }
 
@@ -483,9 +550,9 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
             @Override
             public void execute() {
-                assert activeLocalVariables.containsKey(index) : name;
-                assert activeLocalVariables.get(index).equals(type) : name;
-                activeLocalVariables.remove(index);
+                assert declarations.containsKey(index) : name;
+                assert declarations.get(index).equals(type) : name;
+                declarations.remove(index);
             }
         }
     }
