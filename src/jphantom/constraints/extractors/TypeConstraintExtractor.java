@@ -98,8 +98,6 @@ public class TypeConstraintExtractor extends AbstractExtractor
     {   
         private int insnNo = 0;
         private Map<Integer,Type> declarations = new HashMap<>();
-        private Map<CompoundValue,Integer> arrayIndices = 
-            new IdentityHashMap<>();
 
         // Constructor chaining
 
@@ -175,37 +173,23 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     CompoundValue val = getStack(0);
                     CompoundValue arrayObj = getStack(2);
 
-                    // if (arrayIndices.containsKey(arrayObj)) {
-                    //     // Index at local variable table
-                    //     int index = arrayIndices.get(arrayObj);
-                    //     assert getLocal(index) == arrayObj;
+                    int max = getFrame().getLocals();
+
+                    for (int i = 0; i < max; i++) {
+                        if (arrayObj != getFrame().getLocal(i))
+                            continue;
                         
-                    //     if (declarations.containsKey(index)) {
-                    //         Type declaredType = declarations.get(index);
+                        if (declarations.containsKey(i)) {
+                            Type declaredType = declarations.get(i);
 
-                    //         assert declaredType != null;
-                    //         assert declaredType.getSort() == Type.ARRAY;
+                            assert declaredType != null;
+                            assert declaredType.getSort() == Type.ARRAY;
 
-                    //         // Elements must be of the appropriate type
-                    //         addConstraint(val, ArrayType.elementOf(declaredType));
-                    //     }
-                    // }
-
-                    // if (arrayObj.hasDeclaration()) {
-                    //     TypeDeclaration decl = arrayObj.getDeclaration();
-                        
-                    //     if (decl.inScope()) {
-                    //         Type declaredType = decl.declaredType();
-                            
-                    //         assert declaredType != null;
-                    //         assert declaredType.getSort() == Type.ARRAY;;
-
-                    //         // Elements must be of the appropriate type
-                    //         addConstraint(val, ArrayType.elementOf(declaredType));
-                    //     }
-                    // }
-                    
-                    System.out.println("Active: " + declarations);
+                            // Elements must be of the appropriate type
+                            addConstraint(val, ArrayType.elementOf(declaredType));
+                            break;
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -230,27 +214,16 @@ public class TypeConstraintExtractor extends AbstractExtractor
             try {
                 switch(opcode) {
                 case ASTORE:
-                    System.out.println("Variable No: " + var);
-                    System.out.println("Active: " + declarations);
-
                     CompoundValue val = getLocal(var);
                     CompoundValue obj = getStack(0);
 
                     if (declarations.containsKey(var))
                     {
                         Type declaredType = declarations.get(var);
-
                         assert declaredType != null;
-                        System.out.println("(exact match) " + declaredType);
 
                         // Found local variable in local variable table
                         addConstraint(obj, declaredType);
-
-                        // // Store array index
-                        // if (declaredType.getSort() == Type.ARRAY)
-                        //     arrayIndices.put(obj, var);
-                        // else
-                        //     arrayIndices.remove(obj);
                     }
                     break;
                 default:
@@ -377,8 +350,6 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 commands.remove(label);
             }
 
-            System.out.println("Active: " + declarations);
-
             // Extract relevant type constraints
             for (Map.Entry<Integer,Type> entry : declarations.entrySet())
             {
@@ -387,7 +358,6 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
                 try {
                     CompoundValue val = getLocal(i);
-                    System.out.println("Compound Value: " + val + " " + i);
                     addConstraint(val, declared);
                 } catch (UnreachableCodeException ign) {}
             }
@@ -484,9 +454,12 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     "Total Frames (" + analyzer.getFrames().length + 
                     ") != Number of Instructions (" + insnNo + ")");
             }
-            // Sanity Check
+            // Sanity Checks
             for (List<Command> commandSet : commands.values())
                 assert commandSet.isEmpty();
+
+            assert declarations.isEmpty();
+
             super.visitEnd();
         }
 
