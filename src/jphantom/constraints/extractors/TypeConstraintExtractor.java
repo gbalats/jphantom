@@ -183,7 +183,12 @@ public class TypeConstraintExtractor extends AbstractExtractor
                             Type declaredType = declarations.get(i);
 
                             assert declaredType != null;
-                            assert declaredType.getSort() == Type.ARRAY;
+
+                            if (declaredType.getSort() != Type.ARRAY) {
+                                assert ARRAY_INTERFACES.contains(declaredType) ||
+                                    declaredType == OBJECT : declaredType;
+                                break;
+                            }
 
                             // Elements must be of the appropriate type
                             addConstraint(val, ArrayType.elementOf(declaredType));
@@ -213,6 +218,17 @@ public class TypeConstraintExtractor extends AbstractExtractor
             logInstruction(opcode);
             try {
                 switch(opcode) {
+                case ALOAD:
+                    if (declarations.containsKey(var))
+                    {
+                        CompoundValue val = getLocal(var);
+                        Type declaredType = declarations.get(var);
+                        assert declaredType != null;
+
+                        // Found local variable in local variable table
+                        addConstraint(val, declaredType);
+                    }
+                    break;
                 case ASTORE:
                     CompoundValue val = getLocal(var);
                     CompoundValue obj = getStack(0);
@@ -350,17 +366,20 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 commands.remove(label);
             }
 
-            // Extract relevant type constraints
-            for (Map.Entry<Integer,Type> entry : declarations.entrySet())
-            {
-                int i = entry.getKey();
-                Type declared = entry.getValue();
-
-                try {
-                    CompoundValue val = getLocal(i);
-                    addConstraint(val, declared);
-                } catch (UnreachableCodeException ign) {}
-            }
+            // A new entry in the local variable table is added exactly
+            // AFTER the corresponding ASTORE instruction (if such exists).
+            // Thus, we cannot extract the relevant type constraint at the 
+            // point of the ASTORE instruction, since there will be no entry
+            // in the local variable table. We could also try to trace the
+            // constraint at this point (when the declared type is added to 
+            // the local variable table), but this wouldn't always work.
+            // The problem is that at the start of the local variable table
+            // entry's region, the local variable slot may be inhabited by
+            // a leftover item from another execution path. However, this 
+            // item will be erased later by another ASTORE instruction before
+            // any ALOAD loads it to the stack. Therefore, the correct point 
+            // to extract the constraint is the point of the ALOAD instruction,
+            // where the slot item must surely be of the declared type. 
 
             insnNo++;
             super.visitLabel(label);
@@ -513,6 +532,13 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 assert !declarations.containsKey(index) : name;
                 declarations.put(index, type);
             }
+
+            @Override
+            public String toString() {
+                return "Adding local variable: " + 
+                    type.getClassName() + " " + name + 
+                    " at slot " + index;
+            }
         }
 
         public class LocalVariableRemoval extends LocalVariableChange
@@ -526,6 +552,13 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 assert declarations.containsKey(index) : name;
                 assert declarations.get(index).equals(type) : name;
                 declarations.remove(index);
+            }
+
+            @Override
+            public String toString() {
+                return "Removing local variable: " + 
+                    type.getClassName() + " " + name + 
+                    " at slot " + index;
             }
         }
     }
