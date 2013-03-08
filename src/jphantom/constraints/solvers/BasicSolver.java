@@ -159,24 +159,28 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         }
 
         // Add pseudo-edges to enforce correct supertypes
-        for (Type source : hierarchy)
+        for (SubtypeConstraint e : new HashSet<>(graph.edgeSet()))
         {
-            // Skip interfaces
-            if (hierarchy.isInterface(source))
-                continue;
+            Type source = graph.getEdgeSource(e);
+            final Type target = graph.getEdgeTarget(e);
 
-            assert graph.containsVertex(source);
+            while (hierarchy.contains(source)) {
+                assert !hierarchy.isInterface(source);
 
-            Type target = hierarchy.getSuperclass(source);
+                final Type p = hierarchy.getSuperclass(source);
 
-            // Compute outgoing edges of source
-            List<Type> successors = successorListOf(graph, source);
+                if (p == null) {
+                    assert source.equals(OBJECT);
+                    throw new InsolvableConstraintException(e);
+                }
+ 
+                assert graph.containsEdge(source, p) : p;
 
-            assert target == null || successors.contains(target) : target;
+                if (p.equals(target))
+                    break;
 
-            for (Type succ : successors)
-                if (!succ.equals(target))
-                    addConstraintEdge(target, succ);
+                addConstraintEdge(source = p, target);
+            }
         }
 
         // Create specialized single inheritance solver
