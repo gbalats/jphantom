@@ -71,7 +71,7 @@ public class MultipleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,Lis
                     if (neighbor.equals(target))
                         continue;
 
-                    if (!removableEdge(e))
+                    if (!removableEdge(source, target))
                         continue;
 
                     if (closure.containsEdge(neighbor, target)) {
@@ -87,10 +87,14 @@ public class MultipleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,Lis
             solution.put(v, successorListOf(graph, v));
     }
 
-    protected final boolean removableEdge(E edge) {
+    protected final boolean removableEdge(E edge, DirectedGraph<V,E> graph) {
         if (!graph.containsEdge(edge))
             throw new IllegalArgumentException();
         return removableEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge));
+    }
+
+    protected final boolean removableEdge(E edge) {
+        return removableEdge(edge, _graph);
     }
 
     protected boolean removableEdge(V source, V target) {

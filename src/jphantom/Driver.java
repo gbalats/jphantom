@@ -100,9 +100,11 @@ public class Driver implements Types
         // Analyze
 
         TypeConstraintSolver solver = 
-            new PruningSolver(
-                new ConstraintStoringSolver(
-                    new BasicSolver.Builder().hierarchy(hierarchy).build()));
+            new ConstraintStoringSolver(
+                new BasicSolver.Builder().hierarchy(hierarchy).build());
+
+        // Prune unrelated types before feeding them to the solver
+        solver = new PruningSolver(solver);
 
         TypeConstraintExtractor extractor = new TypeConstraintExtractor(solver);
 

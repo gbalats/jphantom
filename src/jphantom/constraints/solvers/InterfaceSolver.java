@@ -69,7 +69,7 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
     public void markClass(V vertex)
     {
         // Add to constraint graph
-        graph.addVertex(vertex);
+        _graph.addVertex(vertex);
 
         // Mark class
         strategy.markClass(vertex);
@@ -78,7 +78,7 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
     public void markInterface(V vertex)
     {
         // Add to constraint graph
-        graph.addVertex(vertex);
+        _graph.addVertex(vertex);
 
         // Mark interface
         strategy.markInterface(vertex);

@@ -15,17 +15,17 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
     public SingleInheritanceSolver(EdgeFactory<V,E> factory, V root) {
         super(factory, new MapFactory<V,V>());
         this.root = root;
-        this.graph.addVertex(root);
+        this._graph.addVertex(root);
     }
 
     public SingleInheritanceSolver(DirectedGraph<V,E> graph, V root) {
         super(graph, new MapFactory<V,V>());
         this.root = root;
-        this.graph.addVertex(root);
+        this._graph.addVertex(root);
         
-        for (V v : this.graph.vertexSet())
+        for (V v : this._graph.vertexSet())
             if (!v.equals(root))
-                this.graph.addEdge(v, root);
+                this._graph.addEdge(v, root);
     }
 
     ///////////////////// Methods /////////////////////
@@ -34,8 +34,8 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
     public void addConstraintEdge(V source, V target)
     {
         super.addConstraintEdge(source, target);
-        graph.addEdge(source, root);
-        graph.addEdge(target, root);        
+        _graph.addEdge(source, root);
+        _graph.addEdge(target, root);        
     }
     
     private DirectedGraph<V,E> getComponent(DirectedGraph<V,E> graph, V node)
@@ -64,10 +64,14 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
             if (graph.outDegreeOf(vertex) == 0)
                 unconstrained.add(vertex);
 
-        while (!unconstrained.isEmpty())
+        // Randomizing the unconstrained node order
+        LinkedList<V> ul = new LinkedList<>(unconstrained);
+        Collections.shuffle(ul, new Random(System.currentTimeMillis()));
+
+        while (!ul.isEmpty())
         {
             // Remove an unconstrained node
-            V next = unconstrained.pollFirst();
+            V next = ul.removeFirst();
 
             // Skip if next was visited in another component
             // of one of its neighbors

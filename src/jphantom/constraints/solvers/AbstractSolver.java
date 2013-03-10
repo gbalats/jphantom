@@ -11,7 +11,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     protected S solution;
     private final Factory<S> solutionFactory;
     protected final EdgeFactory<V,E> factory;
-    protected final DirectedGraph<V,E> graph;
+    protected final DirectedGraph<V,E> _graph;
     private DirectedGraph<V,E> unmodifiableGraph;
 
     ////////////// Constructors //////////////
@@ -23,7 +23,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     public AbstractSolver(DirectedGraph<V,E> graph, Factory<S> solutionFactory) {
         this.solutionFactory = solutionFactory;
         this.factory = graph.getEdgeFactory();
-        this.graph = graph;
+        this._graph = graph;
         this.unmodifiableGraph = new UnmodifiableDirectedGraph<V,E>(graph);
     }
 
@@ -50,7 +50,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
         if (solved) { return this; }
 
         DirectedGraph<V,E> backup = new SimpleDirectedGraph<V,E>(factory);
-        Graphs.addGraph(backup, graph);
+        Graphs.addGraph(backup, _graph);
         solution = solutionFactory.create();
         solve(backup);
         solved = true;
@@ -60,16 +60,16 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     @Override
     public void addConstraintEdge(V source, V target)
     {
-        if (!graph.containsEdge(source, target))
+        if (!_graph.containsEdge(source, target))
             solved = false;
 
-        if (!graph.containsVertex(source))
-            graph.addVertex(source);
+        if (!_graph.containsVertex(source))
+            _graph.addVertex(source);
 
-        if (!graph.containsVertex(target))
-            graph.addVertex(target);
+        if (!_graph.containsVertex(target))
+            _graph.addVertex(target);
 
-        graph.addEdge(source, target);
+        _graph.addEdge(source, target);
     }
 
 

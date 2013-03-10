@@ -371,7 +371,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                 Type sc = hierarchy.getSuperclass(n);
 
                 if (!sc.equals(parent)) {
-                    SubtypeConstraint impliedEdge = graph.getEdgeFactory().
+                    SubtypeConstraint impliedEdge = _graph.getEdgeFactory().
                         createEdge(n, parent);
 
                     throw new CrossoverConstraintException(impliedEdge, sc);
