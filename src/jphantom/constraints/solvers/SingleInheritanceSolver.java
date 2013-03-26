@@ -58,15 +58,14 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
 
         // Compute unconstrained nodes
 
-        final NavigableSet<V> unconstrained = newSet(top);
+        final Set<V> unconstrained = new HashSet<>();
 
         for (V vertex : graph.vertexSet())
             if (graph.outDegreeOf(vertex) == 0)
                 unconstrained.add(vertex);
 
-        // Randomizing the unconstrained node order
-        LinkedList<V> ul = new LinkedList<>(unconstrained);
-        Collections.shuffle(ul, new Random(System.currentTimeMillis()));
+        // Determining the unconstrained node order
+        Deque<V> ul = order(unconstrained, top);
 
         while (!ul.isEmpty())
         {
@@ -116,7 +115,7 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
         assert graph.vertexSet().isEmpty();
     }
 
-    protected NavigableSet<V> newSet(V prev) {
-        return new TreeSet<V>();
+    protected Deque<V> order(Set<V> unconstrained, V prev) {
+        return new LinkedList<>(unconstrained);
     }
 }

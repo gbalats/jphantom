@@ -187,11 +187,45 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         // that prioritizes direct subclasses
         classSolver = new SingleInheritanceSolver<Type,SubtypeConstraint>(graph, OBJECT)
             {
+                private Random rand = new Random(System.currentTimeMillis());
+
                 @Override
-                protected NavigableSet<Type> newSet(Type prev) {
-                    return new TreeSet<Type>(new Priority(prev));
+                protected Deque<Type> order(Set<Type> unconstrained, Type parent)
+                {
+                    Deque<Type> ordered = new LinkedList<>();
+                    List<Type> rest = new LinkedList<>();
+
+                    for (Type t : unconstrained)
+                        if (hierarchy.contains(t))
+                        {
+                            Type sc = hierarchy.getSuperclass(t);
+
+                            if (!sc.equals(parent)) {
+                                SubtypeConstraint impliedEdge = _graph.getEdgeFactory().
+                                    createEdge(t, parent);
+
+                                throw new CrossoverConstraintException(impliedEdge, sc);
+                            }
+                            ordered.addLast(t);
+                        } else {
+                            rest.add(t);
+                        }
+
+                    // Randomize the remaining nodes order
+                    Collections.shuffle(rest, rand);
+
+                    ordered.addAll(rest);
+                    return ordered;
                 }
-            }.solve();
+            };
+
+        // Las Vegas Style
+        while (true) {
+            try {
+                classSolver.solve();
+                break;
+            } catch (CrossoverConstraintException exc) {}
+        }
     }
 
     @Override
@@ -355,45 +389,6 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
 
         public ClassHierarchy getHierarchy() { return hierarchy; }
         public Type getRoot() { return root; }
-    }
-
-    private class Priority implements Comparator<Type> {
-        private final Type parent;
-
-        Priority(Type parent) {
-            this.parent = parent;
-        }
-        
-        private Type checkedNode(Type n)
-        {
-            if (hierarchy.contains(n))
-            {
-                Type sc = hierarchy.getSuperclass(n);
-
-                if (!sc.equals(parent)) {
-                    SubtypeConstraint impliedEdge = _graph.getEdgeFactory().
-                        createEdge(n, parent);
-
-                    throw new CrossoverConstraintException(impliedEdge, sc);
-                }
-            }
-            return n;
-        }
-
-        @Override
-        public int compare(Type t1, Type t2)
-        {
-            t1 = checkedNode(t1);
-            t2 = checkedNode(t2);
-
-            // Prioritize non-phantom classes
-            if (hierarchy.contains(t1) && !hierarchy.contains(t2))
-                return -1;
-            if (!hierarchy.contains(t1) && hierarchy.contains(t2))
-                return 1;
-            // o.w. use lexicographic ordering
-            return t1.toString().compareTo("" + t2);
-        }
     }
 
     private class RecursiveSolver extends MultipleInheritanceSolver<Type,SubtypeConstraint>
