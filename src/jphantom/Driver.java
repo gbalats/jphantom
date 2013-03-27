@@ -1,6 +1,8 @@
 package jphantom;
 
-import com.beust.jcommander.JCommander;
+import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.spi.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,7 @@ public class Driver implements Types
     private final Phantoms phantoms = Phantoms.V();
     private final Map<Type,ClassNode> nodes = new HashMap<>();
 
-    private final static Logger logger = 
+    protected final static Logger logger = 
         LoggerFactory.getLogger(Driver.class);
 
     /* Constructors */
@@ -260,25 +262,38 @@ public class Driver implements Types
             });
     }
 
+    private static void usage(CmdLineParser parser) {
+        System.err.print("java -jar <jphantom> ");
+        parser.printSingleLineUsage(System.err);
+        System.err.println("\n");
+        parser.printUsage(System.err);
+        System.exit(1);
+    }
+
     /* Main */
 
     public static void main(String[] args) throws IOException
     {
-        Options opt = Options.V();
+        Options bean = Options.V();
 
-        JCommander commander = new JCommander(opt, args);
-
-        // Print usage and exit
-        if (opt.getHelp()) {
-            commander.usage();
-            System.exit(1);
+        CmdLineParser parser = new CmdLineParser(bean);
+        try {
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            // handling of wrong arguments
+            System.err.println("Error: " + e.getMessage() + "\nUsage:\n");
+            usage(parser);
         }
 
-        logger.debug("Options: \n{}", opt);
+        // Print usage and exit
+        if (bean.getHelp())
+            usage(parser);
 
-        Path injar = opt.getSource();
-        Path outjar = opt.getTarget();
-        Path classdir = opt.getDestinationDir();
+        logger.debug("Options: \n{}", bean);
+
+        Path injar = bean.getSource();
+        Path outjar = bean.getTarget();
+        Path classdir = bean.getDestinationDir();
 
         Files.deleteIfExists(outjar);
         Files.createDirectories(classdir);
@@ -291,7 +306,7 @@ public class Driver implements Types
         new JarExtender(injar, outjar, classdir).extend();
         
         // Remove class files
-        if (opt.purgeClassFiles()) {
+        if (bean.purgeClassFiles()) {
             logger.info("Removing temporary class files...");
             deleteDirectory(classdir);
         }
