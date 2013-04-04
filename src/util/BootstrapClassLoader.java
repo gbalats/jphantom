@@ -1,5 +1,8 @@
 package jphantom.util;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 public class BootstrapClassLoader extends ClassLoader {
     protected BootstrapClassLoader() {
         /*
@@ -10,7 +13,12 @@ public class BootstrapClassLoader extends ClassLoader {
     }
 
     private static final BootstrapClassLoader INSTANCE = 
-        new BootstrapClassLoader();
+        AccessController.doPrivileged(
+            new PrivilegedAction<BootstrapClassLoader>() {
+                public BootstrapClassLoader run() {
+                    return new BootstrapClassLoader();
+                }
+            });
 
     public static BootstrapClassLoader v() { return INSTANCE; }
 }

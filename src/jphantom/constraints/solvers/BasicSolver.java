@@ -408,7 +408,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         private List<Type> domainOf(Type source) {
             if (!domains.containsKey(source)) {
                 try {
-                    Set<Type> supertypes = closure.getAllSupertypes(source);
+                    closure.getAllSupertypes(source);
                     domains.put(source, Collections.<Type>emptyList());
                 } catch (IncompleteSupertypesException exc) {
                     List<Type> domain = new ArrayList<>();

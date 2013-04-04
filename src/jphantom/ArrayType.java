@@ -13,14 +13,16 @@ public class ArrayType
         if (dimensions < 1)
             throw new IllegalArgumentException("Non-positive dimension argument: " + dimensions);
 
-        // Compute array descriptor prefix
+        StringBuilder builder = new StringBuilder();
 
-        String prefix = "";
-
+        // Append array descriptor prefix
         for (int i = 0; i < dimensions; i++)
-            prefix += "[";
+            builder.append("[");
 
-        return Type.getObjectType(prefix + elementType.getDescriptor());
+        // Append Element type
+        builder.append(elementType.getDescriptor());
+
+        return Type.getObjectType("" + builder);
     }
 
     public static Type fromElementType(Type elementType) {

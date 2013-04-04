@@ -37,7 +37,7 @@ public class JarExtender
         JarFile injar = new JarFile(in.toFile());
 
         try {
-            Manifest jarManifest = injar.getManifest();
+            // Manifest jarManifest = injar.getManifest();
             JarOutputStream outjar = new JarOutputStream(
                 new FileOutputStream(out.toFile()));
 

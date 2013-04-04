@@ -13,8 +13,7 @@ import static jphantom.dataflow.TypeInterpreter.NULL_VALUE;
 
 public class ExtendedInterpreter extends Interpreter<CompoundValue> implements Opcodes
 {
-    private TypeInterpreter i;
-    private ClassHierarchy hier;
+    private TypeInterpreter i; // delegator
 
     public ExtendedInterpreter(ClassHierarchy hier) {
         this(ASM4, hier);
@@ -22,11 +21,7 @@ public class ExtendedInterpreter extends Interpreter<CompoundValue> implements O
 
     public ExtendedInterpreter(int api, ClassHierarchy hier) {
         super(api);
-
-        // Delegator
-
         this.i = new TypeInterpreter(api, hier);
-        this.hier = hier;
     }
 
     @Override

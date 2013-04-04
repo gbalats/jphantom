@@ -5,7 +5,7 @@ import org.objectweb.asm.commons.Method;
 
 public class IllegalBytecodeException extends RuntimeException
 {
-    protected static String prefix = "\n   ";
+    protected static final String prefix = "\n   ";
     protected static final long serialVersionUID = 783453457L;
     private final Type clazz;
     private final Method method;

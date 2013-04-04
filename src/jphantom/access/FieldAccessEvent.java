@@ -18,6 +18,18 @@ public class FieldAccessEvent extends Event
             " " + super.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        // Will be compared with bare Event objects
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        // Will be compared with bare Event objects
+        return super.hashCode();
+    }
+
     public static class Builder
     {
         private String fName = null;

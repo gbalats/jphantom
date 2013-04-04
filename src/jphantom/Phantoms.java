@@ -58,8 +58,14 @@ public class Phantoms extends ForwardingSet<Type>
             // Dump the class in a file
 
             File outFile = locationOf(outDir, key);
-            outFile.getParentFile().mkdirs();
-            DataOutputStream dout = new DataOutputStream(new FileOutputStream(outFile));
+
+            if (!outFile.getParentFile().isDirectory() && 
+                !outFile.getParentFile().mkdirs())
+                throw new IOException("" + outFile.getParentFile());
+
+            DataOutputStream dout = new DataOutputStream(
+                new FileOutputStream(outFile));
+
             try {
                 dout.write(bytes);
                 dout.flush();

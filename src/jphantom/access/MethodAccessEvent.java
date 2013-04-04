@@ -13,9 +13,22 @@ public class MethodAccessEvent extends Event
         desc = builder.desc;
     }
 
+    @Override
     public String toString() {
         return "Accessing method: " + name + desc + 
             " " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // Will be compared with bare Event objects
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        // Will be compared with bare Event objects
+        return super.hashCode();
     }
 
     public static class Builder

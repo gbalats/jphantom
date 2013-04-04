@@ -179,10 +179,10 @@ public abstract class CompoundValue implements Value
 
         if (!left.isReference() || !right.isReference()) {
             do {
-                if (left.equals(UNINITIALIZED_VALUE))
+                if (UNINITIALIZED_VALUE.equals(left.asBasicValue()))
                     break;
 
-                if (right.equals(UNINITIALIZED_VALUE))
+                if (UNINITIALIZED_VALUE.equals(right.asBasicValue()))
                     break;
 
                 // TODO: check why this is not valid

@@ -32,7 +32,10 @@ public class MethodAdder extends ClassVisitor implements Opcodes
         this.mAcc = mAcc;
         this.mName = mName;
         this.mDesc = mDesc;
-        this.mExc = mExc;
+        this.mExc = (mExc != null) ? new String[mExc.length] : null;
+
+        if (mExc != null)
+            System.arraycopy(mExc, 0, this.mExc, 0, mExc.length);
     }
 
     @Override

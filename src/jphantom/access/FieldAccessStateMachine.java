@@ -4,7 +4,7 @@ import java.util.*;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import jphantom.constraints.*;
-
+import edu.umd.cs.findbugs.annotations.*;
 import com.google.common.collect.*;
 
 public class FieldAccessStateMachine extends AccessStateMachine
@@ -73,6 +73,7 @@ public class FieldAccessStateMachine extends AccessStateMachine
             return this;
         }
 
+        @SuppressFBWarnings(value = "SF_SWITCH_FALLTHROUGH")
         public EventSequence moveTo(FieldAccessEvent event)
         {
             super.moveTo(event);

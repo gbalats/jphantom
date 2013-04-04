@@ -14,6 +14,7 @@ import jphantom.conversions.*;
 import jphantom.constraints.solvers.*;
 import jphantom.ArrayType;
 import util.Command;
+import edu.umd.cs.findbugs.annotations.*;
 import static org.objectweb.asm.util.Printer.OPCODES;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 
@@ -259,6 +260,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
 
         @Override
+        @SuppressFBWarnings(value = "SF_SWITCH_FALLTHROUGH")
         public void visitFieldInsn(
             int opcode, 
             String owner, 
@@ -276,7 +278,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     obj = getStack(0);
                     addConstraint(obj, Type.getObjectType(owner));
                     break;
-                case PUTFIELD:
+                case PUTFIELD: // Fallthrough intended
                     obj = getStack(1);
                     addConstraint(obj, Type.getObjectType(owner));
                 case PUTSTATIC:
@@ -293,6 +295,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
 
         @Override
+        @SuppressFBWarnings(value = "SF_SWITCH_FALLTHROUGH")
         public void visitMethodInsn(
             int opcode, 
             String owner, 
@@ -316,7 +319,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
                 // Widening constraint for receiver
 
-                switch(opcode) {
+                switch(opcode) { // Fallthroughs intended
                 case INVOKESPECIAL:
                     if (!"<init>".equals(name))
                         break;
@@ -563,7 +566,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
     }
 
-    private class UnreachableCodeException extends Exception
+    private static class UnreachableCodeException extends Exception
     {
         protected static final long serialVersionUID = 893453456345L;
     }

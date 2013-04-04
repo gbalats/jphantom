@@ -104,6 +104,16 @@ public class MethodSignature extends Method implements Opcodes
         return t.getClassName().replaceFirst("java\\.lang\\.", "");
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     // public boolean equals(Object obj) {
     //     if (this == obj)
     //         return true;
