@@ -14,7 +14,7 @@ public interface Solver<V,E,S> {
     void addConstraintEdge(V source, V target);
 
     
-    public class UnsatisfiableStateException extends Exception
+    class UnsatisfiableStateException extends Exception
     {
         protected final static long serialVersionUID = 8345346567L;
 

@@ -1,7 +1,7 @@
 package jphantom.tree;
 
 import java.util.*;
-import jphantom.*;
+import jphantom.Types;
 import org.objectweb.asm.Type;
 
 /** @author George Balatsouras */

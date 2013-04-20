@@ -2,11 +2,7 @@ package jphantom.constraints.solvers;
 
 import java.util.*;
 import org.jgrapht.*;
-import com.google.common.base.Predicate;
 import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterators.getNext;
-import static com.google.common.collect.Sets.filter;
-import static com.google.common.collect.Sets.difference;
 
 public abstract class LayeringSolver<V,E> extends MultipleInheritanceSolver<V,E>
 {
@@ -23,7 +19,6 @@ public abstract class LayeringSolver<V,E> extends MultipleInheritanceSolver<V,E>
                 throw new IllegalArgumentException();
             else {
                 V source = graph.getEdgeSource(e);
-                V target = graph.getEdgeTarget(e);
 
                 if (!projections.containsKey(source))
                     throw new IllegalArgumentException("" + e);
@@ -84,7 +79,6 @@ public abstract class LayeringSolver<V,E> extends MultipleInheritanceSolver<V,E>
             for (Iterator<E> it = specialEdges.iterator(); it.hasNext();)
             {
                 E e = it.next();
-                    
                 V source = graph.getEdgeSource(e);
                 V target = graph.getEdgeTarget(e);
                 

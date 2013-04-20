@@ -224,7 +224,9 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
             try {
                 classSolver.solve();
                 break;
-            } catch (CrossoverConstraintException exc) {}
+            } catch (CrossoverConstraintException exc) {
+                continue;
+            }
         }
     }
 
@@ -265,7 +267,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                 // Compute Projections
                 try {
                     // Must include all supertypes, including classes
-                    Set<Type> supertypes = closure.getAllSupertypes(source);
+                    closure.getAllSupertypes(source);
 
                     // No phantom projections => insolvable constraint
                     throw new InsolvableConstraintException(e);

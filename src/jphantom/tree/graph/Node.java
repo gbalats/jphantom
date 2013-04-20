@@ -1,7 +1,6 @@
 package jphantom.tree.graph;
 
 import java.util.*;
-import jphantom.tree.*;
 import org.objectweb.asm.Type;
 
 public class Node

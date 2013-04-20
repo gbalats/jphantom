@@ -84,6 +84,5 @@ public abstract class AbstractExtractor implements ConversionVisitor, Types
         // Add constraint to underlying solver
         conv.asConstraint().accept(solver);
         logger.debug("Adding constaint: {}", conv.asConstraint());
-        return;
     }
 }

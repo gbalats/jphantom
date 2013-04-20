@@ -1,7 +1,6 @@
 package jphantom.constraints.solvers;
 
 import java.util.*;
-import jphantom.tree.ClassHierarchy;
 import jphantom.constraints.*;
 
 public class ConstraintStoringSolver extends ForwardingSolver

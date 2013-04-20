@@ -7,22 +7,13 @@ import jphantom.tree.*;
 import jphantom.constraints.*;
 import jphantom.exc.IllegalBytecodeException;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-
 import java.util.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.util.TraceClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.signature.*;
 
 public class ClassPhantomExtractor extends ClassVisitor implements Opcodes

@@ -1,6 +1,5 @@
 package jphantom.exc;
 
-import org.objectweb.asm.Type;
 import jphantom.constraints.Constraint;
 
 public class InsolvableConstraintException extends RuntimeException

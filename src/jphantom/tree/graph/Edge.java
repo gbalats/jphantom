@@ -1,8 +1,6 @@
 package jphantom.tree.graph;
 
-import jphantom.tree.*;
 import org.jgrapht.*;
-import org.objectweb.asm.Type;
 
 public class Edge {
     private final Node from;

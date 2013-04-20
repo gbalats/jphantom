@@ -1,7 +1,5 @@
 package jphantom.access;
 
-import org.objectweb.asm.Opcodes;
-
 public class FieldAccessEvent extends Event
 {
     public final String name;
@@ -16,18 +14,6 @@ public class FieldAccessEvent extends Event
     public String toString() {
         return "Accessing field: " + name + desc + 
             " " + super.toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        // Will be compared with bare Event objects
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        // Will be compared with bare Event objects
-        return super.hashCode();
     }
 
     public static class Builder

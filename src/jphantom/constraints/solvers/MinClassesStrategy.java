@@ -2,8 +2,6 @@ package jphantom.constraints.solvers;
 
 import java.util.*;
 import org.jgrapht.*;
-import org.objectweb.asm.Type;
-
 import static org.jgrapht.Graphs.*;
 import static jphantom.constraints.solvers.InterfaceSolver.GraphCycleException;
 

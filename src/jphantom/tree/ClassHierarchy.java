@@ -56,7 +56,7 @@ public interface ClassHierarchy extends Iterable<Type>, Types
 
     /////////////// Transitive Closure ///////////////
 
-    public interface Snapshot extends ClassHierarchy {
+    interface Snapshot extends ClassHierarchy {
 
         /**
          * Returns a list of all class supertypes. The list always starts with

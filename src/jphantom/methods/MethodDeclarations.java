@@ -3,7 +3,7 @@ package jphantom.methods;
 
 import java.util.*;
 import org.jgrapht.*;
-import jphantom.*;
+import jphantom.Types;
 import jphantom.tree.*;
 import jphantom.tree.graph.*;
 import org.objectweb.asm.Type;

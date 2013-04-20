@@ -5,7 +5,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import jphantom.methods.MethodSignature;
-import jphantom.exc.IllegalBytecodeException;
 
 public class MethodAdder extends ClassVisitor implements Opcodes
 {

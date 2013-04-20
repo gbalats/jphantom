@@ -5,7 +5,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.commons.Method;
 import jphantom.access.*;
 import jphantom.exc.IllegalBytecodeException;
 

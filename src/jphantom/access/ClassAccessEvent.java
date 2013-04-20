@@ -1,7 +1,5 @@
 package jphantom.access;
 
-import org.objectweb.asm.Opcodes;
-
 public class ClassAccessEvent extends Event
 {
     public final int access;
@@ -14,18 +12,6 @@ public class ClassAccessEvent extends Event
     public String toString() {
         return "Accessing class as: " + access + 
             " " + super.toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        // Will be compared with bare Event objects
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        // Will be compared with bare Event objects
-        return super.hashCode();
     }
 
     public static class Builder

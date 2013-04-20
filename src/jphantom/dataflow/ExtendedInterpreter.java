@@ -8,9 +8,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.*;
 import org.objectweb.asm.tree.*;
 
-import static jphantom.dataflow.TypeInterpreter.NULL_VALUE;
-
-
 public class ExtendedInterpreter extends Interpreter<CompoundValue> implements Opcodes
 {
     private TypeInterpreter i; // delegator

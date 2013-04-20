@@ -1,9 +1,7 @@
 package jphantom.adapters;
 
 import java.util.*;
-import jphantom.exc.IllegalBytecodeException;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.ClassVisitor;
 
 public class AccessAdapter extends ClassVisitor implements Opcodes

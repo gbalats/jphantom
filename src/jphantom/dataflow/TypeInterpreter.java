@@ -19,7 +19,6 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
         values.put(NULL_TYPE, NULL_VALUE);
     }
 
-    private ClassHierarchy hier;
     private ClassHierarchy.Snapshot closure;
 
     public TypeInterpreter(ClassHierarchy hier) {
@@ -28,7 +27,6 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
 
     public TypeInterpreter(int api, ClassHierarchy hier) {
         super(api);
-        this.hier = hier;
         this.closure = new PseudoSnapshot(hier);
     }
 

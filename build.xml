@@ -43,7 +43,7 @@
   <target name="jar" depends="compile">
     <mkdir dir="${jar.dir}"/>
     <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
-	  <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+      <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
       <manifest>
         <attribute name="Main-Class" value="${main-class}"/>
       </manifest>
@@ -76,13 +76,16 @@
 
   <!-- Run target -->
   <target name="run" depends="jar">
-	<!-- execute the main(  ) method in a Java class -->
+    <!-- execute the main(  ) method in a Java class -->
     <java fork="true" classname="${main-class}">
       <assertions>
         <enable/>
       </assertions>
-	  <!-- pass the command-line arguments -->
-	  <arg value="@${param.file}"/>
+      <!-- pass the command-line arguments -->
+      <arg value="--save-class-files"/>
+      <arg value="-o"/>
+      <arg value="out/complement.jar"/>
+      <arg value="testing/antlr-minus.jar"/>
       <classpath>
         <path refid="classpath"/>
         <path location="${jar.dir}/${ant.project.name}.jar"/>

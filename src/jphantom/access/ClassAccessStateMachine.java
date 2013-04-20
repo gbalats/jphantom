@@ -1,7 +1,6 @@
 package jphantom.access;
 
 import java.util.*;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import jphantom.constraints.*;
 

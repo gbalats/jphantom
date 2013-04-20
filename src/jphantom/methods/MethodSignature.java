@@ -5,7 +5,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.commons.Method;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+// import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class MethodSignature extends Method implements Opcodes
 {
@@ -102,16 +102,6 @@ public class MethodSignature extends Method implements Opcodes
 
     private String toString(Type t) {
         return t.getClassName().replaceFirst("java\\.lang\\.", "");
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
     }
 
     // public boolean equals(Object obj) {
