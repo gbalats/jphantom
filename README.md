@@ -1,4 +1,4 @@
-jphantom
+JPhantom
 ========
 
 A tool for Java program complementation.
