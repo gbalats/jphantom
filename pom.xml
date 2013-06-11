@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jphantom</groupId>
   <artifactId>jphantom</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>JPhantom</name>
   <description>A tool for Java program complementation.</description>
   <packaging>jar</packaging>

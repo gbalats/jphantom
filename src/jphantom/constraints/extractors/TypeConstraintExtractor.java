@@ -90,7 +90,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 for (int i = 0; i <= mv.insnNo; i++)
                     logger.trace("Frame at point: {}\n{}", i, analyzer.getFrames()[i]);
             throw new IllegalBytecodeException.Builder(cName)
-                .message("Instruction: " + mv.insnNo)
+                .message("Instruction: %d", mv.insnNo)
                 .method(meth.name, meth.desc).cause(e).build();
         }
     }

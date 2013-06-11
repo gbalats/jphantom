@@ -48,6 +48,7 @@ public class Driver implements Types
         this.outDir = out;
 
         ClassHierarchy hierarchy = ClassHierarchies.fromJar(jarname);
+        ClassMembers members = ClassMembers.fromJar(jarname, hierarchy);
 
         // Create Jar Input Stream
         JarInputStream jin = new JarInputStream(new FileInputStream(jarname));
@@ -68,7 +69,7 @@ public class Driver implements Types
 
                 logger.trace("Reading jar entry: {}", entry.getName());
                 ClassReader reader = new ClassReader(jarFile.getInputStream(entry));
-                reader.accept(new ClassPhantomExtractor(hierarchy), 0);
+                reader.accept(new ClassPhantomExtractor(hierarchy, members), 0);
 
                 // At this point, every phantom class has been extracted.
                 // Moreover, our class hierarchy has been augmented so
