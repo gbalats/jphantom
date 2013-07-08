@@ -190,7 +190,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 // Skip array classes
 
                 if (phantom.getSort() == Type.ARRAY)
-                        break;
+                    break;
 
                 boolean abstractMethod = false;
 

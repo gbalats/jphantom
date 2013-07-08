@@ -114,7 +114,7 @@ public class ClassMembers implements Opcodes, Types
                     throw new PhantomLookupException(sc);
 
                 rec = records.get(sc);
-                assert rec != null;
+                assert rec != null : "Missing record for: " + sc;
             }
             return null;
         }
