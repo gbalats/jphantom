@@ -187,7 +187,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
                             if (declaredType.getSort() != Type.ARRAY) {
                                 assert ARRAY_INTERFACES.contains(declaredType) ||
-                                    declaredType == OBJECT : declaredType;
+                                    declaredType.equals(OBJECT) : declaredType;
                                 break;
                             }
 
