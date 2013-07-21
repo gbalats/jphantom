@@ -23,6 +23,7 @@ import jphantom.constraints.extractors.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
+import org.objectweb.asm.signature.*;
 import static jphantom.constraints.solvers.AbstractSolver.UnsatisfiableStateException;
 
 public class Driver implements Types
@@ -48,8 +49,18 @@ public class Driver implements Types
         this.outDir = out;
 
         ClassHierarchy hierarchy = ClassHierarchies.fromJar(jarname);
+        ClassMembers members = ClassMembers.fromJar(jarname, hierarchy);
+
+        // Resolve all phantom supertypes so far
+
+        final SignatureVisitor visitor = new PhantomAdder(
+            hierarchy, members, phantoms);
+
+        for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
+            new SignatureReader("" + unknown).acceptType(visitor);
 
         // Create Jar Input Stream
+
         JarInputStream jin = new JarInputStream(new FileInputStream(jarname));
         JarEntry entry;
         JarFile jarFile = new JarFile(jarname);
@@ -68,7 +79,7 @@ public class Driver implements Types
 
                 logger.trace("Reading jar entry: {}", entry.getName());
                 ClassReader reader = new ClassReader(jarFile.getInputStream(entry));
-                reader.accept(new ClassPhantomExtractor(hierarchy), 0);
+                reader.accept(new ClassPhantomExtractor(hierarchy, members), 0);
 
                 // At this point, every phantom class has been extracted.
                 // Moreover, our class hierarchy has been augmented so

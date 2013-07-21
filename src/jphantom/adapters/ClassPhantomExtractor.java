@@ -2,10 +2,18 @@ package jphantom.adapters;
 
 import jphantom.Phantoms;
 import jphantom.Transformer;
+import jphantom.ClassMembers;
+import jphantom.fields.FieldSignature;
+import jphantom.methods.MethodSignature;
 import jphantom.access.*;
 import jphantom.tree.*;
+import jphantom.tree.closure.*;
 import jphantom.constraints.*;
 import jphantom.exc.IllegalBytecodeException;
+import jphantom.exc.PhantomLookupException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import org.objectweb.asm.Label;
@@ -18,25 +26,46 @@ import org.objectweb.asm.signature.*;
 
 public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 {
+    protected final static Logger logger = LoggerFactory.getLogger(ClassPhantomExtractor.class);
+
     private final Phantoms phantoms = Phantoms.V();
     private final ClassHierarchy hierarchy;
+    private final ClassMembers members;
     private final SignatureVisitor sv;
     private Type clazz;
     private String mname;
     private String mdesc;
 
-    public ClassPhantomExtractor(int api, ClassVisitor cv, ClassHierarchy hierarchy) {
+    public ClassPhantomExtractor(int api, ClassVisitor cv, ClassHierarchy hierarchy, ClassMembers members) {
         super(api, cv);
         this.hierarchy = hierarchy;
-        this.sv = new PhantomAdder(hierarchy, phantoms);
+        this.members = members;
+        this.sv = new PhantomAdder(hierarchy, members, phantoms);
     }
 
-    public ClassPhantomExtractor(ClassVisitor cv, ClassHierarchy hierarchy) {
-        this(ASM4, cv, hierarchy);
+    public ClassPhantomExtractor(ClassVisitor cv, ClassHierarchy hierarchy, ClassMembers members) {
+        this(ASM4, cv, hierarchy, members);
     }
 
-    public ClassPhantomExtractor(ClassHierarchy hierarchy) {
-        this(null, hierarchy);
+    public ClassPhantomExtractor(ClassHierarchy hierarchy, ClassMembers members) {
+        this(null, hierarchy, members);
+    }
+
+    private boolean hasPhantomSupertype(Type type)
+    {
+        if (!hierarchy.contains(type))
+            throw new IllegalArgumentException();
+
+        // Search for all supertypes
+        try {
+            new PseudoSnapshot(hierarchy).getAllSupertypes(type);
+        } catch (IncompleteSupertypesException exc) {
+            // Phantom supertype exists => load every supertype
+            for (Type i : exc.getSupertypes())
+                new SignatureReader("" + i).acceptType(sv);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -149,8 +178,55 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader(phantom.toString()).acceptType(sv);
                 new SignatureReader(desc).accept(sv);
 
-                if (phantom.getSort() == Type.ARRAY || hierarchy.contains(phantom))
+                // Skip array classes
+
+                if (phantom.getSort() == Type.ARRAY)
                     break;
+
+                boolean abstractMethod = false;
+
+                // Skip available classes, except in the case of phantom field
+
+                if (hierarchy.contains(phantom)) {
+                    try {
+                        // No phantom supertypes, skip
+                        if (!hasPhantomSupertype(phantom))
+                            break;
+
+                        // Lookup Method
+                        MethodSignature sign = members.lookupMethod(phantom, name, desc);
+
+                        // Lookup failed => Abstract class calling abstract method 
+                        // possibly defined in an interface (TODO: check)
+                        if (sign == null) {
+                            // Mark as abstract method
+                            abstractMethod = true;
+
+                            // Search for referenced method in interfaces
+                            sign = members.lookupInterfaceMethod(phantom, name, desc);
+
+                            if (sign == null)
+                                throw new IllegalBytecodeException.Builder(clazz)
+                                    .method(mname, mdesc)
+                                    .message("Method Lookup failed (%s): %s %s", phantom, desc, name)
+                                    .build();
+                        }
+                        else if (!sign.getDescriptor().equals(desc))
+                            throw new IllegalBytecodeException.Builder(clazz)
+                                .method(mname, mdesc)
+                                .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
+                                .build();
+
+                        break;
+                    } catch (PhantomLookupException exc) {
+                        logger.trace("Found missing method reference in {}: {} {}", phantom, desc, name);
+                        logger.trace("First supertype: {}", exc.missingClass());
+
+                        // Add field to first phantom supertype instead
+                        phantom = exc.missingClass();
+                        assert phantom != null;
+                    }
+                }
 
                 // Get top class visitor
 
@@ -161,7 +237,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 // Construct new method access context
 
                 MethodAccessEvent event = new MethodAccessEvent.Builder()
-                    .setOpcode(opcode)
+                    .setOpcode(abstractMethod ? INVOKEINTERFACE : opcode)
                     .setDescriptor(desc)
                     .setName(name)
                     .build();
@@ -232,10 +308,44 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader(phantom.toString()).acceptType(sv);
                 new SignatureReader(desc).acceptType(sv);
 
-                // Skip available classes
+                // Skip array classes
 
-                if (phantom.getSort() == Type.ARRAY || hierarchy.contains(phantom))
-                    break;
+                if (phantom.getSort() == Type.ARRAY)
+                        break;
+
+                // Skip available classes, except in the case of phantom field
+
+                if (hierarchy.contains(phantom)) {
+                    try {
+                        // No phantom supertypes, skip
+                        if (!hasPhantomSupertype(phantom))
+                            break;
+
+                        // Lookup Field
+                        FieldSignature sign = members.lookupField(phantom, name);
+
+                        // Lookup failed
+                        if (sign == null)
+                            throw new IllegalBytecodeException.Builder(clazz)
+                                .method(mname, mdesc)
+                                .message("Field Lookup failed (%s): %s %s", phantom, desc, name)
+                                .build();
+
+                        // Check descriptor
+                        if (!sign.getDescriptor().equals(desc))
+                            throw new IllegalBytecodeException.Builder(clazz)
+                                .method(mname, mdesc)
+                                .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
+                                .build();
+
+                        break;
+                    } catch (PhantomLookupException exc) {
+                        logger.trace("Found missing field reference in {}: {} {}", phantom, desc, name);
+                        
+                        // Add field to first phantom supertype instead
+                        phantom = exc.missingClass();
+                    }
+                }
 
                 // Get top class visitor
 

@@ -15,6 +15,10 @@ public class MethodAccessStateMachine extends AccessStateMachine
     public static final State STATIC_STATE = new State(ACC_STATIC).asPublic();
     public static final State INTERFACE_STATE = new State(ACC_ABSTRACT).asPublic();
 
+    // Initial state should not be accepted.
+    // That is why we encode an illegal access modifier (private + public)
+    // to make sure that no such state is accepted as the final one.
+
     /////////////////////// Transition Table ///////////////////////
 
     private final Table<State,Event,State> transitions = 

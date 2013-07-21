@@ -66,8 +66,8 @@ public class IllegalBytecodeException extends RuntimeException
             return this;
         }
 
-        public Builder message(String msg) {
-            this.msg = msg;
+        public Builder message(String format, Object ... args) {
+            this.msg = String.format(format, args);
             return this;
         }
 

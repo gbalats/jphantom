@@ -37,6 +37,7 @@ public class MethodDeclarations implements Types
         {
             Set<MethodSignature> direct = new HashSet<>(mtable.get(t));
 
+            // Remove private methods
             for (Iterator<MethodSignature> it = direct.iterator(); it.hasNext();)
             {
                 MethodSignature m = it.next();

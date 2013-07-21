@@ -1,22 +1,20 @@
 package jphantom.methods;
 
 import java.util.*;
+import jphantom.Signature;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.commons.Method;
-// import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class MethodSignature extends Method implements Opcodes
+public class MethodSignature extends Signature
 {
-    private String repr;
-    private final int access;
+    private final Method m;
     private final List<Type> exceptions;
 
     private MethodSignature(Builder builder)
     {
-        super(builder.name, builder.desc);
-        this.access = builder.access;
+        super(builder.access);
+        this.m = new Method(builder.name, builder.desc);
         this.exceptions = Collections.unmodifiableList(
             Arrays.asList(builder.exceptions));
     }
@@ -63,14 +61,9 @@ public class MethodSignature extends Method implements Opcodes
         return exceptions;
     }
 
-    public int getAccess() {
-        return access;
-    }
-
-    public String toString() {
-        // Lazy initialization
-        if (repr != null) { return repr; }
-
+    @Override
+    public String toStringAux()
+    {    
         StringBuilder builder = new StringBuilder();
 
         // Access Modifiers
@@ -96,40 +89,35 @@ public class MethodSignature extends Method implements Opcodes
 
             builder.setLength(builder.length() - 2);
         }
-
-        return repr = builder.toString();
+        return builder.toString();
     }
 
-    private String toString(Type t) {
-        return t.getClassName().replaceFirst("java\\.lang\\.", "");
+    /* Delegated methods */
+
+    @Override
+    public boolean equals(Object obj) {
+        return m.equals(obj);
     }
 
-    // public boolean equals(Object obj) {
-    //     if (this == obj)
-    //         return true;
-    //     if (!(obj instanceof MethodSignature))
-    //         return false;
-    //     MethodSignature other = (MethodSignature) obj;
-
-    //     return super.equals(other) && 
-    //         exceptions.equals(other.exceptions) && 
-    //         modifiers.equals(other.modifiers);
-    // }
-
-    // public int hashCode() {
-    //     return new HashCodeBuilder(17,37)
-    //         .append(exceptions)
-    //         .append(modifiers)
-    //         .appendSuper(super.hashCode())
-    //         .toHashCode();
-    // }
-
-    public boolean isAbstract() {
-        return (access & ACC_ABSTRACT) != 0;
+    @Override
+    public int hashCode() {
+        return m.hashCode();
     }
 
-    public boolean isPrivate() {
-        return (access & ACC_PRIVATE) != 0;
+    public Type[] getArgumentTypes() {
+        return m.getArgumentTypes();
+    }
+
+    public String getDescriptor() {
+        return m.getDescriptor();
+    }
+
+    public String getName()  {
+        return m.getName();
+    }
+    
+    public Type getReturnType() {
+        return m.getReturnType();
     }
 
     public static MethodSignature fromMethodNode(MethodNode node)
@@ -138,45 +126,5 @@ public class MethodSignature extends Method implements Opcodes
             .access(node.access)
             .exceptions(node.exceptions.toArray(new String[0]))
             .build();
-    }
-
-    private void appendAccess(StringBuilder buf)
-    {
-        if ((access & Opcodes.ACC_PUBLIC) != 0) {
-            buf.append("public ");
-        }
-        if ((access & Opcodes.ACC_PRIVATE) != 0) {
-            buf.append("private ");
-        }
-        if ((access & Opcodes.ACC_PROTECTED) != 0) {
-            buf.append("protected ");
-        }
-        if ((access & Opcodes.ACC_FINAL) != 0) {
-            buf.append("final ");
-        }
-        if ((access & Opcodes.ACC_STATIC) != 0) {
-            buf.append("static ");
-        }
-        if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) {
-            buf.append("synchronized ");
-        }
-        if ((access & Opcodes.ACC_VOLATILE) != 0) {
-            buf.append("volatile ");
-        }
-        if ((access & Opcodes.ACC_TRANSIENT) != 0) {
-            buf.append("transient ");
-        }
-        if ((access & Opcodes.ACC_ABSTRACT) != 0) {
-            buf.append("abstract ");
-        }
-        if ((access & Opcodes.ACC_STRICT) != 0) {
-            buf.append("strictfp ");
-        }
-        if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
-            buf.append("synthetic ");
-        }
-        if ((access & Opcodes.ACC_ENUM) != 0) {
-            buf.append("enum ");
-        }
     }
 }
