@@ -57,6 +57,9 @@ public class ClassAccessStateMachine extends AccessStateMachine
             // static => (empty)
             // (empty), private => (empty)
 
+            if ((event.access & ACC_INTERFACE) != 0)
+                addConstraint(new IsaClassConstraint(owner));
+
             this.access = event.access;
             return this;
         }

@@ -1,12 +1,12 @@
 package jphantom.access;
 
-public class ClassAccessEvent extends Event
+public abstract class ClassAccessEvent extends Event
 {
     public final int access;
 
-    private ClassAccessEvent(Builder builder) {
-        super(builder.opcode);
-        access = builder.access;
+    private ClassAccessEvent(int access) {
+        super(NOP);
+        this.access = access;
     }
 
     public String toString() {
@@ -14,30 +14,16 @@ public class ClassAccessEvent extends Event
             " " + super.toString();
     }
 
-    public static class Builder
-    {
-        private int access = ACC_PUBLIC;
-        private int opcode = NOP;
-
-        public Builder() {}
-
-        public ClassAccessEvent build() {
-            return new ClassAccessEvent(this);
-        }
-
-        public Builder setAccess(int access) {
-            this.access = access;
-            return this;
-        }
-
-        public Builder setOpcode(int opcode) {
-            switch (opcode) {
-            default:
-                throw new IllegalArgumentException(
-                    "Illegal Class Access Instruction Opcode: " + opcode);
-            }
-            // this.opcode = opcode;
-            // return this;
-        }
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
     }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    public static final ClassAccessEvent IS_ANNOTATION = 
+        new ClassAccessEvent(ACC_ANNOTATION | ACC_INTERFACE | ACC_PUBLIC) {};
 }

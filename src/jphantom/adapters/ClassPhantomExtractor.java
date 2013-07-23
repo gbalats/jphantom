@@ -22,6 +22,7 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.signature.*;
 
 public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
@@ -138,12 +139,12 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         
             Transformer tr = phantoms.getTransformer(inner);
 
-            ClassAccessEvent event = new ClassAccessEvent.Builder()
-                .setAccess(access)
-                .build();
+            // ClassAccessEvent event = new ClassAccessEvent.Builder()
+            //     .setAccess(access)
+            //     .build();
 
-            ClassAccessStateMachine.v()
-                .getEventSequence(inner).moveTo(event).getCurrentAccess();
+            // ClassAccessStateMachine.v()
+            //     .getEventSequence(inner).moveTo(event).getCurrentAccess();
 
             // Chain an access adapter
 
@@ -295,6 +296,63 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader(exc.toString()).acceptType(sv);
             }
             super.visitTryCatchBlock(start, end, handler, type);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible)
+        {
+            Type annotation = Type.getType(desc);
+            new SignatureReader(annotation + "").acceptType(sv);
+
+            do {
+                if (hierarchy.contains(annotation))
+                    break;
+
+                assert phantoms.contains(annotation) : annotation;
+        
+                Transformer tr = phantoms.getTransformer(annotation);
+
+                ClassAccessEvent event = ClassAccessEvent.IS_ANNOTATION;
+
+                int access = ClassAccessStateMachine.v()
+                    .getEventSequence(annotation).moveTo(event).getCurrentAccess();
+
+                // Chain an access adapter
+
+                assert tr.top != null;
+                tr.top = new AccessAdapter(tr.top, access);                    
+            } while(false);
+            
+            return super.visitAnnotation(desc, visible);
+        }
+
+        @Override
+        public AnnotationVisitor visitParameterAnnotation(
+            int parameter, String desc, boolean visible)
+        {
+            Type annotation = Type.getType(desc);
+            new SignatureReader(annotation + "").acceptType(sv);
+
+            do {
+                if (hierarchy.contains(annotation))
+                    break;
+
+                assert phantoms.contains(annotation) : annotation;
+        
+                Transformer tr = phantoms.getTransformer(annotation);
+
+                ClassAccessEvent event = ClassAccessEvent.IS_ANNOTATION;
+
+                int access = ClassAccessStateMachine.v()
+                    .getEventSequence(annotation).moveTo(event).getCurrentAccess();
+
+                // Chain an access adapter
+
+                assert tr.top != null;
+                tr.top = new AccessAdapter(tr.top, access);                    
+            } while(false);
+
+            return super.visitParameterAnnotation(parameter, desc, visible);
         }
 
         @Override
