@@ -19,6 +19,7 @@ import java.util.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -123,6 +124,21 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     }
 
     @Override
+    public FieldVisitor visitField(
+        final int access,
+        final String name,
+        final String desc,
+        final String signature,
+        final Object value)
+    {
+        Type phantom = Type.getType(desc);
+        new SignatureReader(phantom.toString()).acceptType(sv);
+        
+        return new FieldPhantomExtractor(
+            super.visitField(access, name, desc, signature, value));
+    }
+
+    @Override
     public MethodVisitor visitMethod(
         final int access,
         final String name,
@@ -182,6 +198,25 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
             // consistent with the corresponding class file
                     
         } while(false);
+    }
+
+    private class FieldPhantomExtractor extends FieldVisitor
+    {
+        public FieldPhantomExtractor() {
+            super(ClassPhantomExtractor.this.api);
+        }
+
+        public FieldPhantomExtractor(FieldVisitor fv) {
+            super(ClassPhantomExtractor.this.api, fv);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(
+            String desc, boolean visible)
+        {
+            visitAnnotationClass(Type.getType(desc));
+            return super.visitAnnotation(desc, visible);
+        }
     }
 
     private class MethodPhantomExtractor extends MethodVisitor
