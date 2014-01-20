@@ -62,11 +62,11 @@ public class MethodSignature extends Signature
     }
     
     public String[] getExceptionNames() {
-	  String[] excStrs = new String[exceptions.size()];
-	  for (int i = 0; i < exceptions.size(); i++) {
+    	String[] excStrs = new String[exceptions.size()];
+ 	for (int i = 0; i < exceptions.size(); i++) {
 	    excStrs[i] = exceptions.get(i).getInternalName();
-	  }
-	  return excStrs;
+	}
+	return excStrs;
     }
 
     @Override
