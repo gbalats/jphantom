@@ -16,8 +16,8 @@ public class MethodAdder extends ClassVisitor implements Opcodes
     private boolean iface;
 
     public MethodAdder(ClassVisitor cv, MethodSignature m) {
-        this(cv, m.getAccess(), m.getName(), m.getDescriptor(), 
-             m.getExceptions().toArray(new String[0]));
+        this(cv, m.getAccess(), m.getName(), m.getDescriptor(),
+             m.getExceptionNames());
     }
 
     public MethodAdder(ClassVisitor cv, int mAcc, String mName, String mDesc) {
@@ -31,10 +31,7 @@ public class MethodAdder extends ClassVisitor implements Opcodes
         this.mAcc = mAcc;
         this.mName = mName;
         this.mDesc = mDesc;
-        this.mExc = (mExc != null) ? new String[mExc.length] : null;
-
-        if (mExc != null)
-            System.arraycopy(mExc, 0, this.mExc, 0, mExc.length);
+        this.mExc = mExc;
     }
 
     @Override
