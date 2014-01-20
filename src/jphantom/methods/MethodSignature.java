@@ -60,6 +60,14 @@ public class MethodSignature extends Signature
     public List<Type> getExceptions() {
         return exceptions;
     }
+    
+    public String[] getExceptionNames() {
+	  String[] excStrs = new String[exceptions.size()];
+	  for (int i = 0; i < exceptions.size(); i++) {
+	    excStrs[i] = exceptions.get(i).getInternalName();
+	  }
+	  return excStrs;
+    }
 
     @Override
     public String toStringAux()
