@@ -21,7 +21,7 @@ public class ClassMembers implements Opcodes, Types
         this.hierarchy = hierarchy;
     }
 
-    public FieldSignature lookupField(Type clazz, String fieldName) 
+    public FieldSignature lookupField(Type clazz, String fieldName)
     throws PhantomLookupException
     {
         if (!records.containsKey(clazz))
@@ -30,8 +30,18 @@ public class ClassMembers implements Opcodes, Types
         return records.get(clazz).lookupField(fieldName);
     }
 
+    public FieldSignature lookupStaticField(Type clazz, String fieldName)
+    throws PhantomLookupException
+    {
+        if (!records.containsKey(clazz))
+            throw new IllegalArgumentException("" + clazz);
+
+        return records.get(clazz).lookupSField(fieldName);
+    }
+
+
     public MethodSignature lookupMethod(Type clazz, String methodName, String methodDesc) 
-    throws PhantomLookupException 
+    throws PhantomLookupException
     {
         if (!records.containsKey(clazz))
             throw new IllegalArgumentException(clazz + " not contained in key set");
@@ -89,6 +99,42 @@ public class ClassMembers implements Opcodes, Types
 
                 rec = records.get(sc);
             }
+            return null;
+        }
+
+
+        private FieldSignature lookupSField(String name) throws PhantomLookupException
+        {
+            Collection<Type> ifaces;
+
+            try {
+                ifaces = new PseudoSnapshot(hierarchy).getAllSupertypes(type);
+            } catch (IncompleteSupertypesException exc) {
+                ifaces = exc.getSupertypes();
+            }
+
+            List<Type> phantoms = new LinkedList<>();
+
+            // Check existing super-interfaces
+            for (Type iface : ifaces) {
+                // Add to phantoms
+                if (!hierarchy.contains(iface)) {
+                    phantoms.add(iface);
+                    continue;
+                }
+                Record rec = records.get(iface);
+                assert rec != null;
+
+                if (rec.fields.containsKey(name))
+                    return rec.fields.get(name);
+            }
+
+            // Randomize the remaining supertypes order
+            Collections.shuffle(phantoms, rand);
+
+            if (!phantoms.isEmpty())
+                throw new PhantomLookupException(phantoms.get(0));
+
             return null;
         }
 

@@ -399,10 +399,13 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                         if (!hasPhantomSupertype(phantom))
                             break;
 
-                        // Lookup Field
-                        FieldSignature sign = members.lookupField(phantom, name);
+                        // Lookup either in superclasses, or in both class and
+                        // interface supertypes in case of a static field.
+                        FieldSignature sign = (opcode == GETSTATIC || opcode == PUTSTATIC)
+                            ? members.lookupStaticField(phantom, name)
+                            : members.lookupField(phantom, name);
 
-                        // Lookup failed
+                        // Lookup failed and no phantom supertypes were found
                         if (sign == null)
                             throw new IllegalBytecodeException.Builder(clazz)
                                 .method(mname, mdesc)
