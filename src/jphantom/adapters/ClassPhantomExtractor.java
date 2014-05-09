@@ -419,7 +419,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                         break;
                     } catch (PhantomLookupException exc) {
                         logger.trace("Found missing field reference in {}: {} {}", phantom, desc, name);
-                        
+
                         // Add field to first phantom supertype instead
                         phantom = exc.missingClass();
                     }

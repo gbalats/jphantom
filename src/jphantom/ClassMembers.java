@@ -16,13 +16,13 @@ public class ClassMembers implements Opcodes, Types
     private final Map<Type,Record> records = new HashMap<>();
     private final ClassHierarchy hierarchy;
     private final Random rand = new Random(System.currentTimeMillis());
-    
+
     private ClassMembers(ClassHierarchy hierarchy) {
         this.hierarchy = hierarchy;
     }
 
     public FieldSignature lookupField(Type clazz, String fieldName) 
-    throws PhantomLookupException 
+    throws PhantomLookupException
     {
         if (!records.containsKey(clazz))
             throw new IllegalArgumentException("" + clazz);
@@ -40,7 +40,7 @@ public class ClassMembers implements Opcodes, Types
     }
 
     public MethodSignature lookupInterfaceMethod(Type clazz, String methodName, String methodDesc) 
-    throws PhantomLookupException 
+    throws PhantomLookupException
     {
         if (!records.containsKey(clazz))
             throw new IllegalArgumentException(clazz + " not contained in key set");
@@ -78,7 +78,12 @@ public class ClassMembers implements Opcodes, Types
                     return rec.fields.get(name);
 
                 Type sc = hierarchy.getSuperclass(rec.type);
-                
+
+                if (sc == null) {
+                    assert rec.type.equals(OBJECT);
+                    break;
+                }
+
                 if (!hierarchy.contains(sc))
                     throw new PhantomLookupException(sc);
 
@@ -104,7 +109,7 @@ public class ClassMembers implements Opcodes, Types
                     return rec.methods.get(key);
 
                 Type sc = hierarchy.getSuperclass(rec.type);
-                
+
                 if (sc == null) {
                     assert rec.type.equals(OBJECT);
                     break;

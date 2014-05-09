@@ -202,7 +202,7 @@ public class Driver implements Types
 
             // Chain a superclass / interface adapter
 
-            tr.top = solution.isInterface(p) ? 
+            tr.top = solution.isInterface(p) ?
                 new InterfaceTransformer(tr.top) :
                 new SuperclassAdapter(tr.top, solution.getSuperclass(p));
 
@@ -211,7 +211,7 @@ public class Driver implements Types
             tr.top = new InterfaceAdder(tr.top, solution.getInterfaces(p));
         }
     }
-    
+
     private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations)
         throws IOException
     {
@@ -235,10 +235,10 @@ public class Driver implements Types
 
                 File outFile = Phantoms.locationOf(outDir, p);
 
-                ClassVisitor cw = new ClassWriter(0);                
+                ClassVisitor cw = new ClassWriter(0);
                 ClassVisitor cv = new MethodAdder(cw, m);
                 ClassReader  cr = new ClassReader(new FileInputStream(outFile));
-                
+
                 cr.accept(cv, 0);
             }
         }
