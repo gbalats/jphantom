@@ -146,6 +146,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         final String signature,
         final String[] exceptions)
     {
+
+        // Searching declared exceptions for missing types
         if (exceptions != null) {
             for (String type : exceptions) {
                 Type exc = Type.getObjectType(type);
@@ -154,8 +156,15 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 new SignatureReader(exc.toString()).acceptType(sv);
             }
         }
+
+        // Searching method descriptor for missing types
+        new SignatureReader(desc).accept(sv);
+
+        // Storing method being analyzed
         mname = name;
         mdesc = desc;
+
+        // Searching method body for missing types
         return new MethodPhantomExtractor(
             super.visitMethod(access, name, desc, signature, exceptions));
     }
@@ -179,7 +188,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 break;
 
             assert phantoms.contains(inner) : inner;
-        
+
             Transformer tr = phantoms.getTransformer(inner);
 
             // ClassAccessEvent event = new ClassAccessEvent.Builder()
@@ -196,7 +205,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
             // inner class attributes are not checked to be
             // consistent with the corresponding class file
-                    
+
         } while(false);
     }
 
