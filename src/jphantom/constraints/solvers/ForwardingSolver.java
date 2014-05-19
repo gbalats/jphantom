@@ -2,7 +2,7 @@ package jphantom.constraints.solvers;
 
 import java.util.*;
 import jphantom.exc.*;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import jphantom.constraints.*;
 import org.jgrapht.*;
 import org.objectweb.asm.Type;

@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import jphantom.exc.*;
 import jphantom.dataflow.*;
 import jphantom.conversions.*;

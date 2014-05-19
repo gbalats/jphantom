@@ -1,7 +1,7 @@
 package jphantom.constraints.solvers;
 
 import java.util.*;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import jphantom.constraints.*;
 import org.objectweb.asm.Type;
 

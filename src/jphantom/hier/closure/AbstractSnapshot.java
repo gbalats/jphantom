@@ -1,7 +1,7 @@
-package jphantom.tree.closure;
+package jphantom.hier.closure;
 
 import java.util.*;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import org.objectweb.asm.Type;
 
 public abstract class AbstractSnapshot extends ForwardingClassHierarchy

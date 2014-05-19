@@ -1,8 +1,8 @@
-package jphantom.tree.closure;
+package jphantom.hier.closure;
 
 import java.util.*;
-import jphantom.tree.*;
-import jphantom.tree.graph.*;
+import jphantom.hier.*;
+import jphantom.hier.graph.*;
 import jphantom.util.BootstrapClassLoader;
 import org.objectweb.asm.Type;
 import org.jgrapht.DirectedGraph;

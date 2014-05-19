@@ -4,8 +4,8 @@ package jphantom.methods;
 import java.util.*;
 import org.jgrapht.*;
 import jphantom.Types;
-import jphantom.tree.*;
-import jphantom.tree.graph.*;
+import jphantom.hier.*;
+import jphantom.hier.graph.*;
 import org.objectweb.asm.Type;
 import static org.jgrapht.Graphs.*;
 

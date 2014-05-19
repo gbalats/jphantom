@@ -4,8 +4,8 @@ import java.util.*;
 import java.io.*;
 import java.util.jar.*;
 
-import jphantom.tree.*;
-import jphantom.tree.closure.*;
+import jphantom.hier.*;
+import jphantom.hier.closure.*;
 import jphantom.exc.PhantomLookupException;
 import jphantom.fields.FieldSignature;
 import jphantom.methods.MethodSignature;

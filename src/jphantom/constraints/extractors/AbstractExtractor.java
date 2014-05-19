@@ -2,8 +2,8 @@ package jphantom.constraints.extractors;
 
 import jphantom.*;
 import jphantom.exc.*;
-import jphantom.tree.*;
-import jphantom.tree.closure.*;
+import jphantom.hier.*;
+import jphantom.hier.closure.*;
 import jphantom.conversions.*;
 import jphantom.constraints.solvers.*;
 import org.slf4j.Logger;

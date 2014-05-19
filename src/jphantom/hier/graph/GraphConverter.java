@@ -1,7 +1,7 @@
-package jphantom.tree.graph;
+package jphantom.hier.graph;
 
 import jphantom.Types;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.CycleDetector;

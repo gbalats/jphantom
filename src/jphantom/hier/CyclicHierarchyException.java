@@ -1,4 +1,4 @@
-package jphantom.tree;
+package jphantom.hier;
 
 /** @author George Balatsouras */
 public class CyclicHierarchyException extends RuntimeException

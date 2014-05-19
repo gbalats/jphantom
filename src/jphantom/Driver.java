@@ -12,7 +12,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.*;
 import java.util.*;
 import java.util.jar.*;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import jphantom.jar.*;
 import jphantom.methods.*;
 import jphantom.access.*;

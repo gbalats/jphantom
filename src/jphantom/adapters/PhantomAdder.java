@@ -2,7 +2,7 @@ package jphantom.adapters;
 
 import java.util.*;
 import java.io.IOException;
-import jphantom.tree.*;
+import jphantom.hier.*;
 import jphantom.*;
 
 import org.objectweb.asm.*;

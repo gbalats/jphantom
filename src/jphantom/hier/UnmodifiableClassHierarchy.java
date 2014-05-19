@@ -1,4 +1,4 @@
-package jphantom.tree;
+package jphantom.hier;
 
 import java.util.*;
 import org.objectweb.asm.Type;

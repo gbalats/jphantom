@@ -1,6 +1,6 @@
-package jphantom.tree;
+package jphantom.hier;
 
-import jphantom.tree.graph.*;
+import jphantom.hier.graph.*;
 import org.jgrapht.DirectedGraph;
 import org.objectweb.asm.Type;
 import static org.jgrapht.Graphs.*;

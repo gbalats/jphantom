@@ -1,7 +1,7 @@
 package jphantom.dataflow;
 
 import java.util.*;
-import jphantom.tree.*;
+import jphantom.hier.*;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

@@ -1,4 +1,4 @@
-package jphantom.tree;
+package jphantom.hier;
 
 import util.Command;
 import java.util.*;
