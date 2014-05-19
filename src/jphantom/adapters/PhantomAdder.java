@@ -39,48 +39,62 @@ public class PhantomAdder extends SignatureVisitor implements Opcodes
 
     public void visitClassType(Type objType)
     {
-        do {
-            assert objType.getSort() == Type.OBJECT;
+        assert objType.getSort() == Type.OBJECT;
 
-            /* Check if class already exists in the repository */
-            if (hierarchy.contains(objType))
-                break;
+        /* Check if class already exists in the repository */
+        if (hierarchy.contains(objType))
+            return;
 
-            /* Check if class can be resolved in the system (e.g. java.util) */
-            try {
-                // Use the bootstrap loader, so that it works for types
-                // that happen to be included in jphantom itself
+        /* Check if class can be resolved in the system (e.g. java.util) */
+        try {
+            // Use the bootstrap loader, so that it works for types
+            // that happen to be included in jphantom itself
 
-                Class<?> clazz = Class.forName(objType.getClassName(), false, null);
+            Class<?> clazz = Class.forName(objType.getClassName(), false, null);
 
-                Set<Type> prev = new HashSet<>();
+            // At this point, a library type was found. We first have
+            // to add it to the hierarchy of referenced types, along
+            // with all of its supertypes.
 
-                for (Type t : hierarchy)
-                    prev.add(t);
+            // Create a set of types referenced so far.
 
-                // Import from default class loader
-                ClassHierarchies.loadSystemType(hierarchy, clazz);
+            Set<Type> prev = new HashSet<>();
 
-                // Read members of library type
-                for (Type t : hierarchy)
-                    if (!prev.contains(t))
-                        new ClassReader(objType.getInternalName()).accept(members.new Feeder(), 0);
+            for (Type t : hierarchy)
+                prev.add(t);
 
-                break;
-            } catch (ClassNotFoundException ign) {
-            } catch (IOException exc) {
-                logger.warn("Could not locate library type: {}", objType);
-                throw new RuntimeException(exc);
-            }
+            // Import from default class loader. At this point, we may
+            // be at an inconsistent state since a library type could
+            // have been added recursively to the hierarchy, but its
+            // members may have not been recorded.
 
-            /* Add to phantom classes */
-            if (!phantoms.contains(objType))
-            {
-                // Lazy implementation will provide a default value
-                phantoms.getTransformer(objType);
+            ClassHierarchies.loadSystemType(hierarchy, clazz);
 
-                logger.info("Phantom Class \"{}\" detected", objType.getClassName());
-            }
-        } while (false);
+            assert hierarchy.contains(objType) && !prev.contains(objType);
+
+            // Record members of each library type, added just now.
+            for (Type t : hierarchy)
+                if (!prev.contains(t))
+                    new ClassReader(t.getInternalName()).accept(members.new Feeder(), 0);
+
+            return;
+        } catch (ClassNotFoundException ign) {
+
+            // Class could not be loaded. Record it as a phantom class...
+            // Note intentional fallthrough.
+
+        } catch (IOException exc) {
+            logger.warn("Could not locate library type: {}", objType);
+            throw new RuntimeException(exc);
+        }
+
+        /* Add to phantom classes */
+        if (!phantoms.contains(objType))
+        {
+            // Lazy implementation will provide a default value
+            phantoms.getTransformer(objType);
+
+            logger.info("Phantom Class \"{}\" detected", objType.getClassName());
+        }
     }
 }
