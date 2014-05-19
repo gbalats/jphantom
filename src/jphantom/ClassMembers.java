@@ -251,7 +251,7 @@ public class ClassMembers implements Opcodes, Types
         {
             MethodSignature sign = new MethodSignature.Builder(name, desc)
                 .access(access).exceptions(exceptions).build();
-            
+
             records.get(clazz).addMethod(name, sign);
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
@@ -262,7 +262,7 @@ public class ClassMembers implements Opcodes, Types
         {
             FieldSignature sign = new FieldSignature.Builder(name, desc)
                 .access(access).build();
-            
+
             records.get(clazz).addField(name, sign);
             return super.visitField(access, name, desc, signature, value);
         }
@@ -279,7 +279,7 @@ public class ClassMembers implements Opcodes, Types
     {
         try {
             ClassMembers repo = new ClassMembers(hierarchy);
-            
+
             new ClassReader(OBJECT.getInternalName()).accept(repo.new Feeder(), 0);
 
             for (Enumeration<JarEntry> e = file.entries(); e.hasMoreElements();)
@@ -289,7 +289,7 @@ public class ClassMembers implements Opcodes, Types
                 /* Skip directories */
                 if (entry.isDirectory())
                     continue;
-            
+
                 /* Skip non-class files */
                 if (!entry.getName().endsWith(".class"))
                     continue;
