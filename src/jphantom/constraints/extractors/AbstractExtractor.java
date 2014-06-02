@@ -56,8 +56,8 @@ public abstract class AbstractExtractor implements ConversionVisitor, Types
         if (conv.from.getSort() == Type.ARRAY && 
             conv.to.getSort() == Type.ARRAY)
         {
-            Type from = ArrayType.elementOf(conv.from);
-            Type to = ArrayType.elementOf(conv.to);
+            Type from = ArrayTypes.elementOf(conv.from);
+            Type to = ArrayTypes.elementOf(conv.to);
 
             // Conversion for element types
             Conversion subconv = Conversions.getAssignmentConversion(from, to);

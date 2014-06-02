@@ -56,7 +56,7 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
         if (insn.getOpcode() == AALOAD) {
             return value1.equals(NULL_VALUE) ? 
                 NULL_VALUE :
-                newValue(ArrayType.elementOf(value1.getType()));
+                newValue(ArrayTypes.elementOf(value1.getType()));
         }
         return super.binaryOperation(insn, value1, value2);
     }
@@ -106,7 +106,7 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
                     }
 
                     return newValue(
-                        ArrayType.fromElementType(fcs, a.getDimensions())
+                        ArrayTypes.newType(fcs, a.getDimensions())
                     );
                 }
             }

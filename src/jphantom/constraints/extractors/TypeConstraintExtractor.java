@@ -12,7 +12,7 @@ import jphantom.exc.*;
 import jphantom.dataflow.*;
 import jphantom.conversions.*;
 import jphantom.constraints.solvers.*;
-import jphantom.ArrayType;
+import jphantom.ArrayTypes;
 import util.Command;
 import static org.objectweb.asm.util.Printer.OPCODES;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
@@ -191,7 +191,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
                             }
 
                             // Elements must be of the appropriate type
-                            addConstraint(val, ArrayType.elementOf(declaredType));
+                            addConstraint(val, ArrayTypes.elementOf(declaredType));
                             break;
                         }
                     }

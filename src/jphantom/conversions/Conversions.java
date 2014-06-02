@@ -149,8 +149,8 @@ public class Conversions implements Types {
                 if (to.getSort() == Type.ARRAY)
                 {
                     Conversion subconv = getAssignmentConversion(
-                        ArrayType.elementOf(from),
-                        ArrayType.elementOf(to));
+                        ArrayTypes.elementOf(from),
+                        ArrayTypes.elementOf(to));
 
                     if (!(subconv instanceof IllegalConversion))
                         break;
