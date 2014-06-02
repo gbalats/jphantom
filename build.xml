@@ -62,7 +62,7 @@
              classpathref="classpath"
              windowtitle="${app.name} API">
       <link href="http://commons.apache.org/bcel/apidocs/"/>
-      <link href="http://docs.oracle.com/javase/6/docs/api/"/>
+      <link href="http://docs.oracle.com/javase/7/docs/api/"/>
       <!-- Define which files / directory should get included, we include all -->
       <fileset dir="${src.dir}">
         <include name="**/*.java"/>
