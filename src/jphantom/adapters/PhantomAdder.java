@@ -21,7 +21,7 @@ public class PhantomAdder extends SignatureVisitor implements Opcodes
 
     public PhantomAdder(ClassHierarchy hierarchy, ClassMembers members, Phantoms phantoms)
     {
-        super(ASM4);
+        super(ASM5);
         this.hierarchy = hierarchy;
         this.members = members;
         this.phantoms = phantoms;

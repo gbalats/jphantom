@@ -13,7 +13,7 @@ public class ExtendedInterpreter extends Interpreter<CompoundValue> implements O
     private TypeInterpreter i; // delegator
 
     public ExtendedInterpreter(ClassHierarchy hier) {
-        this(ASM4, hier);
+        this(ASM5, hier);
     }
 
     public ExtendedInterpreter(int api, ClassHierarchy hier) {

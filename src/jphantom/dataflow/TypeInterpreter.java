@@ -22,7 +22,7 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
     private ClassHierarchy.Snapshot closure;
 
     public TypeInterpreter(ClassHierarchy hier) {
-        this(ASM4, hier);
+        this(ASM5, hier);
     }
 
     public TypeInterpreter(int api, ClassHierarchy hier) {

@@ -225,11 +225,11 @@ public class ClassMembers implements Opcodes, Types
         }
 
         public Feeder(ClassVisitor cv) {
-            this(ASM4, cv);
+            this(ASM5, cv);
         }
 
         public Feeder() {
-            this(ASM4);
+            this(ASM5);
         }
 
         @Override

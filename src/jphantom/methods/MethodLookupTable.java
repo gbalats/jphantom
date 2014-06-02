@@ -53,11 +53,11 @@ public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
         }
 
         public CachingAdapter(ClassVisitor cv) {
-            this(ASM4, cv);
+            this(ASM5, cv);
         }
 
         public CachingAdapter() {
-            this(ASM4);
+            this(ASM5);
         }
 
         @Override

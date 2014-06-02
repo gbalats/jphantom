@@ -9,7 +9,7 @@ public class AccessAdapter extends ClassVisitor implements Opcodes
     private final int access;
 
     public AccessAdapter(ClassVisitor cv, int access) {
-        super(ASM4, cv);
+        super(ASM5, cv);
         this.access = access;
     }
 

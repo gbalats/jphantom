@@ -27,7 +27,7 @@ public class MethodAdder extends ClassVisitor implements Opcodes
     public MethodAdder(
         ClassVisitor cv, int mAcc, String mName, String mDesc, String[] mExc)
     {
-        super(ASM4, cv);
+        super(ASM5, cv);
         this.mAcc = mAcc;
         this.mName = mName;
         this.mDesc = mDesc;
@@ -89,7 +89,7 @@ public class MethodAdder extends ClassVisitor implements Opcodes
 
                     mv.visitTypeInsn(NEW, exc);
                     mv.visitInsn(DUP);
-                    mv.visitMethodInsn(INVOKESPECIAL, exc, "<init>", desc);
+                    mv.visitMethodInsn(INVOKESPECIAL, exc, "<init>", desc, iface);
                     mv.visitInsn(ATHROW);
                     mv.visitMaxs(maxStack, maxLocals);
                 }

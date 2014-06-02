@@ -13,7 +13,7 @@ public class FieldAdder extends ClassVisitor implements Opcodes
 
     public FieldAdder(ClassVisitor cv, int fAcc, String fName, String fDesc)
     {
-        super(ASM4, cv);
+        super(ASM5, cv);
         this.fAcc = fAcc;
         this.fName = fName;
         this.fDesc = fDesc;

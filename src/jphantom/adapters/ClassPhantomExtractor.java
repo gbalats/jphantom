@@ -46,7 +46,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     }
 
     public ClassPhantomExtractor(ClassVisitor cv, ClassHierarchy hierarchy, ClassMembers members) {
-        this(ASM4, cv, hierarchy, members);
+        this(ASM5, cv, hierarchy, members);
     }
 
     public ClassPhantomExtractor(ClassHierarchy hierarchy, ClassMembers members) {
@@ -239,7 +239,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         }
 
         @Override
-        public void visitMethodInsn(int opcode, String owner, String name, String desc)
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf)
         {
 
             do {
@@ -332,7 +332,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 }
             } while(false);
 
-            super.visitMethodInsn(opcode, owner, name, desc);
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
 
         @Override

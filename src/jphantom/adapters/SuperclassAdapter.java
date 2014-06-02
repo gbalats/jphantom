@@ -10,7 +10,7 @@ public class SuperclassAdapter extends ClassVisitor implements Opcodes
 
     public SuperclassAdapter(ClassVisitor cv, Type superclass)
     {
-        super(ASM4, cv);
+        super(ASM5, cv);
         this.superclass = superclass;
     }
 

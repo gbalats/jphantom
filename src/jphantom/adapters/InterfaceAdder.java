@@ -11,7 +11,7 @@ public class InterfaceAdder extends ClassVisitor implements Opcodes
 
     public InterfaceAdder(ClassVisitor cv, Set<Type> newInterfaces)
     {
-        super(ASM4, cv);
+        super(ASM5, cv);
         this.ifaces = new HashSet<String>();
 
         for (Type i : newInterfaces)

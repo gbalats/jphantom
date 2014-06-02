@@ -7,7 +7,7 @@ import org.objectweb.asm.ClassVisitor;
 public class InterfaceTransformer extends ClassVisitor implements Opcodes
 {
     public InterfaceTransformer(ClassVisitor cv) {
-        super(ASM4, cv);
+        super(ASM5, cv);
     }
 
     @Override

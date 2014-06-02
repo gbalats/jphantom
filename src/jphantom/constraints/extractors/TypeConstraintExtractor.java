@@ -106,7 +106,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
 
         public MethodConstraintExtractor(MethodVisitor mv) {
-            this(ASM4, mv);
+            this(ASM5, mv);
         }
 
         public MethodConstraintExtractor() {
@@ -268,7 +268,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             CompoundValue obj, val;
             logInstruction(opcode);
 
-            try {                
+            try {
                 switch (opcode) {
                 case GETSTATIC:
                     break;
@@ -294,10 +294,11 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         @Override
         public void visitMethodInsn(
-            int opcode, 
-            String owner, 
-            String name, 
-            String desc)
+            int opcode,
+            String owner,
+            String name,
+            String desc,
+            boolean itf)
         {
             logInstruction(opcode);
             try {
@@ -334,7 +335,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             } catch (UnreachableCodeException ign) {}
 
             insnNo++;
-            super.visitMethodInsn(opcode, owner, name, desc);
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
 
         @Override
