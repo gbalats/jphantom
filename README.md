@@ -15,6 +15,10 @@ expected, and a [widening reference
 conversion](http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.5)
 took place, then we must conclude that class A is a supertype of B).
 
+You can read more about the underlying problem of class hierarchy
+complementation in the [OOPSLA '13 paper](http://yanniss.github.io/jphantom-oopsla13.pdf)
+(or the [presentation slides](http://gbalats.github.io/assets/presentations/oopsla2013-jphantom.pdf)).
+
 Usage
 -----
 
