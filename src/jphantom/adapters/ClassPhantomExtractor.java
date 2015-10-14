@@ -342,6 +342,14 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         }
 
         @Override
+        public void visitLdcInsn(Object cst) {
+            if (cst instanceof Type) {
+                new SignatureReader(((Type) cst).toString()).acceptType(sv);
+            }
+            super.visitLdcInsn(cst);
+        }
+
+        @Override
         public void visitMultiANewArrayInsn(String desc, int dims) {
             new SignatureReader(desc).acceptType(sv);
             super.visitMultiANewArrayInsn(desc, dims);
