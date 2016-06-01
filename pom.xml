@@ -21,6 +21,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -30,6 +31,7 @@
           </archive>
         </configuration>
       </plugin>
+      <!-- Building fat JAR -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -73,7 +75,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0-rc1</version>
+      <version>18.0</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
