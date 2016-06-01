@@ -16,6 +16,15 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <name>George Balatsouras</name>
+      <email>gbalats@gmail.com</email>
+      <organization>PLAST research group</organization>
+      <organizationUrl>http://plast-lab.github.io/</organizationUrl>
+    </developer>
+  </developers>
+
   <scm>
     <connection>scm:git:git@github.com:gbalats/jphantom.git</connection>
     <developerConnection>scm:git:git@github.com:gbalats/jphantom.git</developerConnection>
