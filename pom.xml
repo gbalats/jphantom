@@ -88,10 +88,6 @@
   </properties>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <directory>build</directory>
-    <outputDirectory>build/classes</outputDirectory>
-
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
