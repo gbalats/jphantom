@@ -29,7 +29,7 @@
   <scm>
     <connection>scm:git:git@github.com:gbalats/jphantom.git</connection>
     <developerConnection>scm:git:git@github.com:gbalats/jphantom.git</developerConnection>
-    <url>git@github.com:gbalats/jphantom.git</url>
+    <url>https://github.com/gbalats/jphantom.git</url>
   </scm>
 
   <!-- Dependencies -->
