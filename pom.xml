@@ -118,7 +118,7 @@
         <configuration>
           <serverId>ossrh</serverId>
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <stagingProfileId>7edbe315063867</stagingProfileId>
+          <!-- <stagingProfileId>7edbe315063867</stagingProfileId> -->
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
