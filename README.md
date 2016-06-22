@@ -19,6 +19,30 @@ You can read more about the underlying problem of class hierarchy
 complementation in the [OOPSLA '13 paper](http://yanniss.github.io/jphantom-oopsla13.pdf)
 (or the [presentation slides](http://gbalats.github.io/assets/presentations/oopsla2013-jphantom.pdf)).
 
+
+Release
+-------
+
+To list JPhantom as a dependency using Maven, add the following to
+your `pom.xml`:
+
+```xml
+<dependency>
+  <groupId>org.clyze</groupId>
+  <artifactId>jphantom</artifactId>
+  <version>1.2</version>
+</dependency>
+```
+
+To add a dependency using Gradle:
+
+```
+dependencies {
+  compile 'org.clyze:jphantom:1.2'
+}
+```
+
+
 Usage
 -----
 
