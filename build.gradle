@@ -20,6 +20,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'application'
 apply plugin: 'doop'
 
 group = 'org.clyze'
@@ -53,6 +54,8 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.14'
 }
 
+mainClassName = "org.clyze.jphantom.Driver"
+
 doop {
     // host = 'centauri.di.uoa.gr'
     host = 'localhost'
@@ -62,8 +65,5 @@ doop {
     analysis.options.jre = '1.7'
     analysis.options.use_original_names = true
     // analysis.options.only_application_classes_fact_gen = true
-    // analysis.options.main_class = project.mainClassName
-    analysis.options.main_class = "org.clyze.jphantom.Driver"
+    analysis.options.main_class = project.mainClassName
 }
-
-// mainClassName = "org.clyze.jphantom.Driver"
