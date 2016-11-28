@@ -1,0 +1,69 @@
+buildscript {
+    configurations.classpath.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+
+    repositories {
+        maven {
+            url 'http://centauri.di.uoa.gr:8081/artifactory/all-snapshot'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+    }
+
+    dependencies {
+        classpath ('org.clyze:doop-gradle-plugin:1.0-SNAPSHOT') {
+            changing = true
+        }
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'doop'
+
+group = 'org.clyze'
+version = '1.2'
+
+description = """org.clyze:jphantom"""
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {        
+     mavenCentral()
+}
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version:'18.0'
+    compile group: 'org.ow2.asm', name: 'asm-debug-all', version:'5.0.3'
+    compile group: 'args4j', name: 'args4j', version:'2.0.23'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.10'
+    compile group: 'ch.qos.logback', name: 'logback-core', version:'1.0.10'
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.3'
+    compile group: 'net.sf.jgrapht', name: 'jgrapht', version:'0.8.3'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.1'
+    compile group: 'com.google.code.findbugs', name: 'annotations', version:'2.0.1'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.14'
+}
+
+doop {
+    // host = 'centauri.di.uoa.gr'
+    host = 'localhost'
+    port = 8013
+    username = 'gbalats'
+    password = 'gbalats123'
+    analysis.options.jre = '1.7'
+    analysis.options.use_original_names = true
+    // analysis.options.only_application_classes_fact_gen = true
+    // analysis.options.main_class = project.mainClassName
+    analysis.options.main_class = "org.clyze.jphantom.Driver"
+}
+
+// mainClassName = "org.clyze.jphantom.Driver"

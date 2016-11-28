@@ -1,5 +1,7 @@
-target/*
-docs/*
-out/*
-out.jar
-testing/*
+/build/*
+/target/*
+/docs/*
+/out/*
+/out.jar
+/testing/*
+/.gradle/*
