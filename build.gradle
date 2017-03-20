@@ -1,9 +1,16 @@
+
 buildscript {
-    configurations.classpath.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+
+    //configurations.classpath.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 
     repositories {
+        mavenLocal()
+        mavenCentral()
         maven {
-            url 'http://centauri.di.uoa.gr:8081/artifactory/all-snapshot'
+            url "${artifactory_contextUrl}/plast-public"
+        }
+        maven {
+            url "${artifactory_contextUrl}/plast-private"
             credentials {
                 username = "${artifactory_user}"
                 password = "${artifactory_password}"
@@ -12,9 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath ('org.clyze:doop-gradle-plugin:1.0-SNAPSHOT') {
-            changing = true
-        }
+        classpath ('org.clyze:doop-gradle-plugin:1.+')
     }
 }
 
@@ -34,8 +39,12 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-repositories {        
-     mavenCentral()
+repositories {
+    mavenLocal();
+    mavenCentral();
+    maven() {
+        url "${artifactory_contextUrl}/plast-public"
+    }
 }
 
 dependencies {
@@ -67,3 +76,4 @@ doop {
     // analysis.options.only_application_classes_fact_gen = true
     analysis.options.main_class = project.mainClassName
 }
+
