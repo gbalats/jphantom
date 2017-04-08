@@ -60,7 +60,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '3.1'
 }
 
 mainClassName = "org.clyze.jphantom.Driver"
@@ -71,7 +71,7 @@ doop {
     port = 8013
     username = 'gbalats'
     password = 'gbalats123'
-    analysis.options.jre = '1.7'
+    analysis.options.platform = 'java_7_debug'
     analysis.options.use_original_names = true
     // analysis.options.only_application_classes_fact_gen = true
     analysis.options.main_class = project.mainClassName
