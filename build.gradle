@@ -12,8 +12,8 @@ buildscript {
         maven {
             url "${artifactory_contextUrl}/plast-private"
             credentials {
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
+                username = artifactory_user
+                password = artifactory_password
             }
         }
     }
@@ -67,11 +67,11 @@ mainClassName = "org.clyze.jphantom.Driver"
 
 doop {
     // host = 'centauri.di.uoa.gr'
-    host = 'localhost'
-    port = 8013
-    username = 'gbalats'
-    password = 'gbalats123'
-    analysis.options.platform = 'java_7_debug'
+    host = clue_host
+    port = clue_port as Integer
+    username = clue_user
+    password = clue_password
+    analysis.options.jre = '1.7'
     analysis.options.use_original_names = true
     // analysis.options.only_application_classes_fact_gen = true
     analysis.options.main_class = project.mainClassName
