@@ -1,5 +1,6 @@
 package org.clyze.jphantom.adapters;
 
+import org.clyze.jphantom.Options;
 import org.clyze.jphantom.Phantoms;
 import org.clyze.jphantom.Transformer;
 import org.clyze.jphantom.ClassMembers;
@@ -8,17 +9,14 @@ import org.clyze.jphantom.methods.MethodSignature;
 import org.clyze.jphantom.access.*;
 import org.clyze.jphantom.hier.*;
 import org.clyze.jphantom.hier.closure.*;
-import org.clyze.jphantom.constraints.*;
 import org.clyze.jphantom.exc.IllegalBytecodeException;
 import org.clyze.jphantom.exc.PhantomLookupException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.util.TraceClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -46,7 +44,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     }
 
     public ClassPhantomExtractor(ClassVisitor cv, ClassHierarchy hierarchy, ClassMembers members) {
-        this(ASM5, cv, hierarchy, members);
+        this(Options.ASM_VER, cv, hierarchy, members);
     }
 
     public ClassPhantomExtractor(ClassHierarchy hierarchy, ClassMembers members) {

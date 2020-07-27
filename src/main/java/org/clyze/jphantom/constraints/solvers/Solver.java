@@ -1,7 +1,6 @@
 package org.clyze.jphantom.constraints.solvers;
 
 import org.jgrapht.*;
-import java.util.*;
 
 public interface Solver<V,E,S> {
 

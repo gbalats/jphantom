@@ -1,7 +1,7 @@
 package org.clyze.jphantom.constraints.solvers;
 
 import java.util.*;
-import org.clyze.jphantom.exc.*;
+
 import org.clyze.jphantom.hier.*;
 import org.clyze.jphantom.constraints.*;
 import org.jgrapht.*;

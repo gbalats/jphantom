@@ -1,13 +1,11 @@
 package org.clyze.jphantom;
 
 import org.kohsuke.args4j.*;
-import org.kohsuke.args4j.spi.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 import java.util.*;

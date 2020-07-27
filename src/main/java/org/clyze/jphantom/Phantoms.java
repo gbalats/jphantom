@@ -63,15 +63,11 @@ public class Phantoms extends ForwardingSet<Type>
                 !outFile.getParentFile().mkdirs())
                 throw new IOException("" + outFile.getParentFile());
 
-            DataOutputStream dout = new DataOutputStream(
-                new FileOutputStream(outFile));
-
-            try {
-                dout.write(bytes);
-                dout.flush();
-            } finally {
-                dout.close();
-            }
+			try (DataOutputStream dout = new DataOutputStream(
+					new FileOutputStream(outFile))) {
+				dout.write(bytes);
+				dout.flush();
+			}
             files.add(outFile);
         }
         return files;

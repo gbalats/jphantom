@@ -1,6 +1,8 @@
 package org.clyze.jphantom.dataflow;
 
 import java.util.*;
+
+import org.clyze.jphantom.Options;
 import org.clyze.jphantom.hier.*;
 
 import org.objectweb.asm.Opcodes;
@@ -13,7 +15,7 @@ public class ExtendedInterpreter extends Interpreter<CompoundValue> implements O
     private TypeInterpreter i; // delegator
 
     public ExtendedInterpreter(ClassHierarchy hier) {
-        this(ASM5, hier);
+        this(Options.ASM_VER, hier);
     }
 
     public ExtendedInterpreter(int api, ClassHierarchy hier) {

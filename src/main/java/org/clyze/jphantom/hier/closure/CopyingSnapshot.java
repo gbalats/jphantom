@@ -14,8 +14,8 @@ import static org.jgrapht.Graphs.*;
 public class CopyingSnapshot extends PseudoSnapshot
 {
     private final DirectedGraph<Node,Edge> graph;
-    private final SimpleDirectedGraph<Node,Edge> closedGraph = 
-        new SimpleDirectedGraph<Node,Edge>(Edge.factory);
+    private final SimpleDirectedGraph<Node,Edge> closedGraph =
+            new SimpleDirectedGraph<>(Edge.factory);
 
     public CopyingSnapshot(ClassHierarchy other)
     {

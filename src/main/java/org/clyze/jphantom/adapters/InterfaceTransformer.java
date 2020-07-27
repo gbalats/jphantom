@@ -1,13 +1,13 @@
 package org.clyze.jphantom.adapters;
 
-import java.util.*;
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 
 public class InterfaceTransformer extends ClassVisitor implements Opcodes
 {
     public InterfaceTransformer(ClassVisitor cv) {
-        super(ASM5, cv);
+        super(Options.ASM_VER, cv);
     }
 
     @Override

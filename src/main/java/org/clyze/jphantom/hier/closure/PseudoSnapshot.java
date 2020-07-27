@@ -63,7 +63,7 @@ public class PseudoSnapshot extends AbstractSnapshot
     {
         checkedContainedObject(obj);
         Set<Type> supertypes = new HashSet<>();
-        Queue<Type> queue = new LinkedList<Type>();
+        Queue<Type> queue = new LinkedList<>();
         boolean incomplete = false;
         
         do {
@@ -79,8 +79,7 @@ public class PseudoSnapshot extends AbstractSnapshot
                     continue;
                 }
 
-                for (Type i : getInterfaces(t))
-                    queue.add(i);
+                queue.addAll(getInterfaces(t));
             }
             if (!contains(obj))
                 break;

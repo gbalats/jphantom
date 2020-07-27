@@ -225,11 +225,11 @@ public class ClassMembers implements Opcodes, Types
         }
 
         public Feeder(ClassVisitor cv) {
-            this(ASM5, cv);
+            this(Options.ASM_VER, cv);
         }
 
         public Feeder() {
-            this(ASM5);
+            this(Options.ASM_VER);
         }
 
         @Override
@@ -294,15 +294,11 @@ public class ClassMembers implements Opcodes, Types
                 if (!entry.getName().endsWith(".class"))
                     continue;
 
-                InputStream stream = file.getInputStream(entry);
-
-                try {
+                try (InputStream stream = file.getInputStream(entry)) {
                     ClassReader reader = new ClassReader(stream);
 
                     // Add type to hierarchy
                     reader.accept(repo.new Feeder(), 0);
-                } finally {
-                    stream.close();
                 }
             }
             return repo;

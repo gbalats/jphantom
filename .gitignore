@@ -1,5 +1,7 @@
+.idea/*
 target/*
 docs/*
 out/*
 out.jar
 testing/*
+*.iml

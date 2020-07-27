@@ -10,8 +10,6 @@ import org.clyze.jphantom.constraints.*;
 import org.jgrapht.*;
 import org.objectweb.asm.Type;
 
-import static org.jgrapht.Graphs.*;
-
 public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHierarchy>
     implements Types, TypeConstraintSolver
 {
@@ -456,7 +454,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                         throw new UnsatisfiableStateException();
                 } catch (IncompleteSupertypesException ign) {
                     // Add constraint since it can be satisfied eventually
-                    constraints.add(new Pair<Type,Type>(source, target));
+                    constraints.add(new Pair<>(source, target));
                 }
             }
 

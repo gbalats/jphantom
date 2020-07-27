@@ -1,7 +1,6 @@
 package org.clyze.jphantom.fields;
 
 import org.clyze.jphantom.Signature;
-import java.util.*;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldNode;
 

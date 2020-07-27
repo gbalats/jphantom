@@ -1,6 +1,5 @@
 package org.clyze.jphantom.hier.closure;
 
-import java.util.*;
 import org.clyze.jphantom.hier.*;
 import org.objectweb.asm.Type;
 

@@ -28,7 +28,7 @@ public class GraphUtils
                 throw new IllegalArgumentException();
 
         if (edgeSubset == null) {
-            Set<E> tmp = new HashSet<E>();
+            Set<E> tmp = new HashSet<>();
 
             for (V vertex : vertexSubset)
                 tmp.addAll(baseGraph.edgesOf(vertex));
