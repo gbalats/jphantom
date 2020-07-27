@@ -12,7 +12,7 @@ field and method that was referenced and used in the original jar, as
 well as a supertype that respects every type constraint that was found
 (e.g., if phantom class B was used in a place where known class A was
 expected, and a [widening reference
-conversion](http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.5)
+conversion](http://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.5)
 took place, then we must conclude that class A is a supertype of B).
 
 You can read more about the underlying problem of class hierarchy
@@ -30,7 +30,7 @@ your `pom.xml`:
 <dependency>
   <groupId>org.clyze</groupId>
   <artifactId>jphantom</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  compile 'org.clyze:jphantom:1.2'
+  compile 'org.clyze:jphantom:1.3'
 }
 ```
 
