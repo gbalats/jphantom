@@ -79,7 +79,7 @@ public class JarExtender
                 logger.info("Adding entry: " + file);
 
                 // Create a jar entry and add it to the temp jar.
-                JarEntry entry = new JarEntry(file.toString());
+                JarEntry entry = new JarEntry(file.toString().replace("\\", "/"));
                 jar.putNextEntry(entry);
 
                 // Read the file and write it to the jar.
