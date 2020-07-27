@@ -46,34 +46,17 @@ public class Phantoms extends ForwardingSet<Type>
         return mtable;
     }
 
-    public List<File> generateFiles(File outDir) throws IOException
+    public Map<Type, byte[]> generateClasses() throws IOException
     {
-        List<File> files = new LinkedList<>();
+        Map<Type, byte[]> map = new HashMap<>();
 
         for (Map.Entry<Type,Transformer> e : transformers.entrySet())
         {
             Type key = e.getKey();
             byte[] bytes = e.getValue().transform();
 
-            // Dump the class in a file
-
-            File outFile = locationOf(outDir, key);
-
-            if (!outFile.getParentFile().isDirectory() && 
-                !outFile.getParentFile().mkdirs())
-                throw new IOException("" + outFile.getParentFile());
-
-			try (DataOutputStream dout = new DataOutputStream(
-					new FileOutputStream(outFile))) {
-				dout.write(bytes);
-				dout.flush();
-			}
-            files.add(outFile);
+            map.put(key, bytes);
         }
-        return files;
-    }
-
-    public static File locationOf(File outDir, Type type) {
-        return new File(outDir, type.getClassName().replace('.', '/') + ".class");
+        return map;
     }
 }

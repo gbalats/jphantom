@@ -1,40 +1,41 @@
 package org.clyze.jphantom;
 
-import org.kohsuke.args4j.*;
-
+import org.clyze.jphantom.adapters.ClassPhantomExtractor;
+import org.clyze.jphantom.hier.ClassHierarchies;
+import org.clyze.jphantom.hier.ClassHierarchy;
+import org.clyze.jphantom.hier.UnmodifiableClassHierarchy;
+import org.clyze.jphantom.jar.JarExtender;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.*;
-import java.util.*;
-import java.util.jar.*;
-import org.clyze.jphantom.hier.*;
-import org.clyze.jphantom.jar.*;
-import org.clyze.jphantom.methods.*;
-import org.clyze.jphantom.access.*;
-import org.clyze.jphantom.adapters.*;
-import org.clyze.jphantom.constraints.*;
-import org.clyze.jphantom.constraints.solvers.*;
-import org.clyze.jphantom.constraints.extractors.*;
-import org.objectweb.asm.*;
-import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.*;
-import org.objectweb.asm.signature.*;
-import static org.clyze.jphantom.constraints.solvers.AbstractSolver.UnsatisfiableStateException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 public class Driver implements Types
 {
     /* Fields */
 
-    private final ClassHierarchy hierarchy;
-    private final File outDir;
-    private final Phantoms phantoms = Phantoms.V();
-    private final Map<Type,ClassNode> nodes = new HashMap<>();
+    protected final static Logger logger =
+            LoggerFactory.getLogger(Driver.class);
 
-    protected final static Logger logger = 
-        LoggerFactory.getLogger(Driver.class);
+    private final JPhantom phantom;
+    private final File outDir;
 
     /* Constructors */
     
@@ -42,27 +43,19 @@ public class Driver implements Types
         this(jar.toString(), dir.toFile());
     }
 
-    public Driver(String jarname, File out) throws IOException
+    public Driver(String jarname, File outDir) throws IOException
     {
-        this.outDir = out;
+        this.outDir = outDir;
 
         ClassHierarchy hierarchy = ClassHierarchies.fromJar(jarname);
         ClassMembers members = ClassMembers.fromJar(jarname, hierarchy);
-
-        // Resolve all phantom supertypes so far
-
-        final SignatureVisitor visitor = new PhantomAdder(
-            hierarchy, members, phantoms);
-
-        for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
-            new SignatureReader("" + unknown).acceptType(visitor);
 
         // Create Jar Input Stream
 
         JarInputStream jin = new JarInputStream(new FileInputStream(jarname));
         JarEntry entry;
         JarFile jarFile = new JarFile(jarname);
-
+        Map<Type, ClassNode> nodes = new HashMap<>();
         try {
             /* List all JAR entries */
             while ((entry = jin.getNextJarEntry()) != null)
@@ -94,152 +87,49 @@ public class Driver implements Types
         }
 
         hierarchy = new UnmodifiableClassHierarchy(hierarchy);
-
-        // Sanity check
-
-        for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
-            assert phantoms.contains(unknown);
-
-        this.hierarchy = hierarchy;
+        phantom = new JPhantom(nodes, hierarchy, members);
     }
     
 
     /* Methods */
 
-    public void run() throws IOException
-    {        
-        // Analyze
+    public void run() throws IOException {
+        // Generate phantom classes
+        phantom.run();
 
-        TypeConstraintSolver solver = 
-            new ConstraintStoringSolver(
-                new BasicSolver.Builder().hierarchy(hierarchy).build());
-
-        // Prune unrelated types before feeding them to the solver
-        solver = new PruningSolver(solver);
-
-        TypeConstraintExtractor extractor = new TypeConstraintExtractor(solver);
-
-        for (ClassNode node : nodes.values()) {
-            try {
-                extractor.visit(node);
-            } catch (AnalyzerException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        
-        // Additional constraints
-        for (Constraint c : FieldAccessStateMachine.v().getConstraints())
-            c.accept(solver);
-        for (Constraint c : MethodAccessStateMachine.v().getConstraints())
-            c.accept(solver);
-        for (Constraint c : ClassAccessStateMachine.v().getConstraints())
-            c.accept(solver);
-
-        for (Constraint c : solver.getConstraints())
-            logger.info("Constraint: {}", c);
-
-        // Solve constraints
-        ClassHierarchy solution;
-
-        try {
-            solution = solver.solve().getSolution();
-        } catch (UnsatisfiableStateException exc) {
-            throw new RuntimeException(exc);
-        }
-
-        logger.info("Found Solution: \n\n{}", new PrintableClassHierarchy(solution));
-
-        // Add supertypes
-        addSupertypes(solution);
-        
-        // Generate files
-        phantoms.generateFiles(outDir);
-
-        // Load required class methods of the types that comprise our solution
-        fillLookupTable(solution);
-
-        // Add missing methods
-        addMissingMethods(
-            solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
+        // Write generated classes to output directory
+        generateFiles(outDir);
     }
 
-    private void fillLookupTable(ClassHierarchy solution) throws IOException
+    public List<File> generateFiles(File outDir) throws IOException
     {
-        for (Type t : solution)
+        List<File> files = new LinkedList<>();
+
+        for (Map.Entry<Type, byte[]> e : phantom.getGenerated().entrySet())
         {
-            // Phantom Type
-            if (phantoms.contains(t))
-                continue;
+            Type key = e.getKey();
+            byte[] bytes = e.getValue();
 
-            ClassVisitor visitor = phantoms.getLookupTable().new CachingAdapter();
+            // Dump the class in a file
 
-            // Input Type
-            if (nodes.containsKey(t)) {
-                nodes.get(t).accept(visitor);
-                continue;
+            File outFile = locationOf(outDir, key);
+
+            if (!outFile.getParentFile().isDirectory() &&
+                    !outFile.getParentFile().mkdirs())
+                throw new IOException("" + outFile.getParentFile());
+
+            try (DataOutputStream dout = new DataOutputStream(
+                    new FileOutputStream(outFile))) {
+                dout.write(bytes);
+                dout.flush();
             }
-
-            // Library Type
-            new ClassReader(t.getInternalName()).accept(visitor, 0);
+            files.add(outFile);
         }
+        return files;
     }
 
-    private void addSupertypes(ClassHierarchy solution)
-    {
-        for (Type p : solution)
-        {
-            if (hierarchy.contains(p))
-                continue;
-
-            assert phantoms.contains(p) : p;
-
-            // Get top class visitor
-            Transformer tr = phantoms.getTransformer(p);
-
-            assert tr.top != null;
-
-            // Chain a superclass / interface adapter
-
-            tr.top = solution.isInterface(p) ?
-                new InterfaceTransformer(tr.top) :
-                new SuperclassAdapter(tr.top, solution.getSuperclass(p));
-
-            // Chain an interface adder
-
-            tr.top = new InterfaceAdder(tr.top, solution.getInterfaces(p));
-        }
-    }
-
-    private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations)
-        throws IOException
-    {
-        for (Type p : phantoms)
-        {
-            Set<MethodSignature> pending = declarations.getPending(p);
-
-            if (pending == null) {
-                assert !solution.contains(p);
-                continue;
-            }
-
-            if (pending.isEmpty())
-                continue;
-
-            for (MethodSignature m : pending)
-            {
-                logger.debug("Adding method {} to \"{}\"", m, p.getClassName());
-
-                // Chain a method-adder adapter
-
-                File outFile = Phantoms.locationOf(outDir, p);
-
-                ClassVisitor cw = new ClassWriter(0);
-                ClassVisitor cv = new MethodAdder(cw, m);
-                ClassReader  cr = new ClassReader(new FileInputStream(outFile));
-
-                cr.accept(cv, 0);
-            }
-        }
+    public static File locationOf(File outDir, Type type) {
+        return new File(outDir, type.getClassName().replace('.', '/') + ".class");
     }
 
     private static void deleteDirectory(Path dir) throws IOException
