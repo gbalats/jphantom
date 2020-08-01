@@ -108,8 +108,7 @@ public class JPhantom {
 		fillLookupTable(solution);
 
 		// Add missing methods
-		addMissingMethods(
-				generated, solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
+		addMissingMethods(solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
 	}
 
 	private void fillLookupTable(ClassHierarchy solution) throws IOException
@@ -159,7 +158,7 @@ public class JPhantom {
 		}
 	}
 
-	private void addMissingMethods(Map<Type, byte[]> generated, ClassHierarchy solution, MethodDeclarations declarations) {
+	private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations) {
 		for (Type p : phantoms)
 		{
 			Set<MethodSignature> pending = declarations.getPending(p);
