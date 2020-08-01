@@ -28,167 +28,167 @@ import java.util.Map;
 import java.util.Set;
 
 public class JPhantom {
-	protected final static Logger logger =
-			LoggerFactory.getLogger(Driver.class);
-	private final Phantoms phantoms = Phantoms.V();
-	private final Map<Type, ClassNode> nodes;
-	private final ClassHierarchy hierarchy;
-	private final ClassMembers members;
-	private Map<Type, byte[]> generated;
+    protected final static Logger logger =
+            LoggerFactory.getLogger(Driver.class);
+    private final Phantoms phantoms = Phantoms.V();
+    private final Map<Type, ClassNode> nodes;
+    private final ClassHierarchy hierarchy;
+    private final ClassMembers members;
+    private Map<Type, byte[]> generated;
 
-	public JPhantom(Map<Type, ClassNode> nodes, ClassHierarchy hierarchy, ClassMembers members) {
-		this.nodes = nodes;
-		this.hierarchy = hierarchy;
-		this.members = members;
+    public JPhantom(Map<Type, ClassNode> nodes, ClassHierarchy hierarchy, ClassMembers members) {
+        this.nodes = nodes;
+        this.hierarchy = hierarchy;
+        this.members = members;
 
-		// Resolve all phantom supertypes so far
+        // Resolve all phantom supertypes so far
 
-		final SignatureVisitor visitor = new PhantomAdder(
-				hierarchy, members, phantoms);
+        final SignatureVisitor visitor = new PhantomAdder(
+                hierarchy, members, phantoms);
 
-		for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
-			new SignatureReader("" + unknown).acceptType(visitor);
+        for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
+            new SignatureReader("" + unknown).acceptType(visitor);
 
-		// Sanity check
+        // Sanity check
 
-		for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
-			assert phantoms.contains(unknown);
-	}
+        for (Type unknown : ClassHierarchies.unknownTypes(hierarchy))
+            assert phantoms.contains(unknown);
+    }
 
-	public void run() throws IOException
-	{
-		// Analyze
+    public void run() throws IOException
+    {
+        // Analyze
 
-		TypeConstraintSolver solver =
-				new ConstraintStoringSolver(
-						new BasicSolver.Builder().hierarchy(hierarchy).build());
+        TypeConstraintSolver solver =
+                new ConstraintStoringSolver(
+                        new BasicSolver.Builder().hierarchy(hierarchy).build());
 
-		// Prune unrelated types before feeding them to the solver
-		solver = new PruningSolver(solver);
+        // Prune unrelated types before feeding them to the solver
+        solver = new PruningSolver(solver);
 
-		TypeConstraintExtractor extractor = new TypeConstraintExtractor(solver);
+        TypeConstraintExtractor extractor = new TypeConstraintExtractor(solver);
 
-		for (ClassNode node : nodes.values()) {
-			try {
-				extractor.visit(node);
-			} catch (AnalyzerException e) {
-				throw new RuntimeException(e);
-			}
-		}
+        for (ClassNode node : nodes.values()) {
+            try {
+                extractor.visit(node);
+            } catch (AnalyzerException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-		// Additional constraints
-		for (Constraint c : FieldAccessStateMachine.v().getConstraints())
-			c.accept(solver);
-		for (Constraint c : MethodAccessStateMachine.v().getConstraints())
-			c.accept(solver);
-		for (Constraint c : ClassAccessStateMachine.v().getConstraints())
-			c.accept(solver);
+        // Additional constraints
+        for (Constraint c : FieldAccessStateMachine.v().getConstraints())
+            c.accept(solver);
+        for (Constraint c : MethodAccessStateMachine.v().getConstraints())
+            c.accept(solver);
+        for (Constraint c : ClassAccessStateMachine.v().getConstraints())
+            c.accept(solver);
 
-		for (Constraint c : solver.getConstraints())
-			logger.info("Constraint: {}", c);
+        for (Constraint c : solver.getConstraints())
+            logger.info("Constraint: {}", c);
 
-		// Solve constraints
-		ClassHierarchy solution;
+        // Solve constraints
+        ClassHierarchy solution;
 
-		try {
-			solution = solver.solve().getSolution();
-		} catch (Solver.UnsatisfiableStateException exc) {
-			throw new RuntimeException(exc);
-		}
+        try {
+            solution = solver.solve().getSolution();
+        } catch (Solver.UnsatisfiableStateException exc) {
+            throw new RuntimeException(exc);
+        }
 
-		logger.info("Found Solution: \n\n{}", new PrintableClassHierarchy(solution));
+        logger.info("Found Solution: \n\n{}", new PrintableClassHierarchy(solution));
 
-		// Add supertypes
-		addSupertypes(solution);
+        // Add supertypes
+        addSupertypes(solution);
 
-		// Generate files
-		generated = phantoms.generateClasses();
+        // Generate files
+        generated = phantoms.generateClasses();
 
-		// Load required class methods of the types that comprise our solution
-		fillLookupTable(solution);
+        // Load required class methods of the types that comprise our solution
+        fillLookupTable(solution);
 
-		// Add missing methods
-		addMissingMethods(solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
-	}
+        // Add missing methods
+        addMissingMethods(solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
+    }
 
-	private void fillLookupTable(ClassHierarchy solution) throws IOException
-	{
-		for (Type t : solution)
-		{
-			// Phantom Type
-			if (phantoms.contains(t))
-				continue;
+    private void fillLookupTable(ClassHierarchy solution) throws IOException
+    {
+        for (Type t : solution)
+        {
+            // Phantom Type
+            if (phantoms.contains(t))
+                continue;
 
-			ClassVisitor visitor = phantoms.getLookupTable().new CachingAdapter();
+            ClassVisitor visitor = phantoms.getLookupTable().new CachingAdapter();
 
-			// Input Type
-			if (nodes.containsKey(t)) {
-				nodes.get(t).accept(visitor);
-				continue;
-			}
+            // Input Type
+            if (nodes.containsKey(t)) {
+                nodes.get(t).accept(visitor);
+                continue;
+            }
 
-			// Library Type
-			new ClassReader(t.getInternalName()).accept(visitor, 0);
-		}
-	}
+            // Library Type
+            new ClassReader(t.getInternalName()).accept(visitor, 0);
+        }
+    }
 
-	private void addSupertypes(ClassHierarchy solution)
-	{
-		for (Type p : solution)
-		{
-			if (hierarchy.contains(p))
-				continue;
+    private void addSupertypes(ClassHierarchy solution)
+    {
+        for (Type p : solution)
+        {
+            if (hierarchy.contains(p))
+                continue;
 
-			assert phantoms.contains(p) : p;
+            assert phantoms.contains(p) : p;
 
-			// Get top class visitor
-			Transformer tr = phantoms.getTransformer(p);
+            // Get top class visitor
+            Transformer tr = phantoms.getTransformer(p);
 
-			assert tr.top != null;
+            assert tr.top != null;
 
-			// Chain a superclass / interface adapter
+            // Chain a superclass / interface adapter
 
-			tr.top = solution.isInterface(p) ?
-					new InterfaceTransformer(tr.top) :
-					new SuperclassAdapter(tr.top, solution.getSuperclass(p));
+            tr.top = solution.isInterface(p) ?
+                    new InterfaceTransformer(tr.top) :
+                    new SuperclassAdapter(tr.top, solution.getSuperclass(p));
 
-			// Chain an interface adder
+            // Chain an interface adder
 
-			tr.top = new InterfaceAdder(tr.top, solution.getInterfaces(p));
-		}
-	}
+            tr.top = new InterfaceAdder(tr.top, solution.getInterfaces(p));
+        }
+    }
 
-	private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations) {
-		for (Type p : phantoms)
-		{
-			Set<MethodSignature> pending = declarations.getPending(p);
+    private void addMissingMethods(ClassHierarchy solution, MethodDeclarations declarations) {
+        for (Type p : phantoms)
+        {
+            Set<MethodSignature> pending = declarations.getPending(p);
 
-			if (pending == null) {
-				assert !solution.contains(p);
-				continue;
-			}
+            if (pending == null) {
+                assert !solution.contains(p);
+                continue;
+            }
 
-			if (pending.isEmpty())
-				continue;
+            if (pending.isEmpty())
+                continue;
 
-			for (MethodSignature m : pending)
-			{
-				logger.debug("Adding method {} to \"{}\"", m, p.getClassName());
+            for (MethodSignature m : pending)
+            {
+                logger.debug("Adding method {} to \"{}\"", m, p.getClassName());
 
-				// Chain a method-adder adapter
+                // Chain a method-adder adapter
 
-				ClassWriter cw = new ClassWriter(0);
-				ClassVisitor cv = new MethodAdder(cw, m);
+                ClassWriter cw = new ClassWriter(0);
+                ClassVisitor cv = new MethodAdder(cw, m);
 
-				ClassReader cr = new ClassReader(generated.get(p));
-				cr.accept(cv, 0);
+                ClassReader cr = new ClassReader(generated.get(p));
+                cr.accept(cv, 0);
 
-				generated.put(p, cw.toByteArray());
-			}
-		}
-	}
+                generated.put(p, cw.toByteArray());
+            }
+        }
+    }
 
-	public Map<Type, byte[]> getGenerated() {
-		return generated;
-	}
+    public Map<Type, byte[]> getGenerated() {
+        return generated;
+    }
 }

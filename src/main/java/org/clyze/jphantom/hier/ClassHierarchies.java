@@ -69,29 +69,29 @@ public class ClassHierarchies implements Opcodes, Types
                 if(!entry.getName().endsWith(".class"))
                     continue;
 
-				try (InputStream stream = file.getInputStream(entry)) {
-					ClassReader reader = new ClassReader(stream);
-					String ifaceNames[] = reader.getInterfaces();
+                try (InputStream stream = file.getInputStream(entry)) {
+                    ClassReader reader = new ClassReader(stream);
+                    String ifaceNames[] = reader.getInterfaces();
 
-					// Compute Types
+                    // Compute Types
 
-					Type clazz = Type.getObjectType(reader.getClassName());
-					Type superclass = Type.getObjectType(reader.getSuperName());
-					Type ifaces[] = new Type[ifaceNames.length];
+                    Type clazz = Type.getObjectType(reader.getClassName());
+                    Type superclass = Type.getObjectType(reader.getSuperName());
+                    Type ifaces[] = new Type[ifaceNames.length];
 
-					for (int i = 0; i < ifaces.length; i++)
-						ifaces[i] = Type.getObjectType(ifaceNames[i]);
+                    for (int i = 0; i < ifaces.length; i++)
+                        ifaces[i] = Type.getObjectType(ifaceNames[i]);
 
-					// Add type to hierarchy
-					boolean isInterface = (reader.getAccess() & ACC_INTERFACE) != 0;
+                    // Add type to hierarchy
+                    boolean isInterface = (reader.getAccess() & ACC_INTERFACE) != 0;
 
-					if (isInterface) {
-						hierarchy.addInterface(clazz, ifaces);
-						assert superclass.equals(OBJECT);
-					} else {
-						hierarchy.addClass(clazz, superclass, ifaces);
-					}
-				}
+                    if (isInterface) {
+                        hierarchy.addInterface(clazz, ifaces);
+                        assert superclass.equals(OBJECT);
+                    } else {
+                        hierarchy.addClass(clazz, superclass, ifaces);
+                    }
+                }
             }
             return hierarchy;
         } finally {
