@@ -10,6 +10,7 @@ import org.clyze.jphantom.constraints.solvers.*;
 import org.clyze.jphantom.hier.ClassHierarchies;
 import org.clyze.jphantom.hier.ClassHierarchy;
 import org.clyze.jphantom.hier.PrintableClassHierarchy;
+import org.clyze.jphantom.hier.UnmodifiableClassHierarchy;
 import org.clyze.jphantom.methods.MethodDeclarations;
 import org.clyze.jphantom.methods.MethodSignature;
 import org.objectweb.asm.ClassReader;
@@ -38,7 +39,7 @@ public class JPhantom {
 
     public JPhantom(Map<Type, ClassNode> nodes, ClassHierarchy hierarchy, ClassMembers members) {
         this.nodes = nodes;
-        this.hierarchy = hierarchy;
+        this.hierarchy = new UnmodifiableClassHierarchy(hierarchy);
         this.members = members;
 
         // Resolve all phantom supertypes so far

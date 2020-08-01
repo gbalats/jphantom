@@ -86,7 +86,6 @@ public class Driver implements Types
             jin.close();
         }
 
-        hierarchy = new UnmodifiableClassHierarchy(hierarchy);
         phantom = new JPhantom(nodes, hierarchy, members);
     }
     
