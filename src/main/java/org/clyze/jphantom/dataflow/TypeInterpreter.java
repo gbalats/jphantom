@@ -2,7 +2,6 @@ package org.clyze.jphantom.dataflow;
 
 import java.util.*;
 import org.clyze.jphantom.*;
-import org.clyze.jphantom.exc.*;
 import org.clyze.jphantom.hier.*;
 import org.clyze.jphantom.hier.closure.*;
 import org.objectweb.asm.tree.analysis.*;
@@ -13,16 +12,16 @@ import org.objectweb.asm.Type;
 public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
 {
     private static final Map<Type,BasicValue> values = new HashMap<>();
-    protected static final BasicValue NULL_VALUE = new BasicValue(NULL_TYPE);
+    protected static final BasicValue NULL_VALUE = new BasicValue(BasicInterpreter.NULL_TYPE);
 
     static {
-        values.put(NULL_TYPE, NULL_VALUE);
+        values.put(BasicInterpreter.NULL_TYPE, NULL_VALUE);
     }
 
     private ClassHierarchy.Snapshot closure;
 
     public TypeInterpreter(ClassHierarchy hier) {
-        this(ASM5, hier);
+        this(Options.ASM_VER, hier);
     }
 
     public TypeInterpreter(int api, ClassHierarchy hier) {

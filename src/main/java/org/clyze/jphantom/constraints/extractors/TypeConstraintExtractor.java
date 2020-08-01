@@ -2,12 +2,12 @@ package org.clyze.jphantom.constraints.extractors;
 
 import java.util.*;
 
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.clyze.jphantom.hier.*;
 import org.clyze.jphantom.exc.*;
 import org.clyze.jphantom.dataflow.*;
 import org.clyze.jphantom.conversions.*;
@@ -32,7 +32,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
     public TypeConstraintExtractor(TypeConstraintSolver solver) {
         super(solver);
         this.interpreter = new ExtendedInterpreter(hierarchy);
-        this.analyzer = new Analyzer<CompoundValue>(interpreter);
+        this.analyzer = new Analyzer<>(interpreter);
     }
 
     public final void visit(ClassNode node) throws AnalyzerException {
@@ -106,7 +106,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
 
         public MethodConstraintExtractor(MethodVisitor mv) {
-            this(ASM5, mv);
+            this(Options.ASM_VER, mv);
         }
 
         public MethodConstraintExtractor() {
@@ -564,7 +564,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
         }
     }
 
-    private class UnreachableCodeException extends Exception
+    private static class UnreachableCodeException extends Exception
     {
         protected static final long serialVersionUID = 893453456345L;
     }

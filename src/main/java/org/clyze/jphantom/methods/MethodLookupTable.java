@@ -1,11 +1,12 @@
 package org.clyze.jphantom.methods;
 
 import java.util.*;
+
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.clyze.jphantom.access.*;
 import org.clyze.jphantom.exc.IllegalBytecodeException;
 
 public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
@@ -53,11 +54,11 @@ public class MethodLookupTable extends HashMap<Type, Set<MethodSignature>> {
         }
 
         public CachingAdapter(ClassVisitor cv) {
-            this(ASM5, cv);
+            this(Options.ASM_VER, cv);
         }
 
         public CachingAdapter() {
-            this(ASM5);
+            this(Options.ASM_VER);
         }
 
         @Override

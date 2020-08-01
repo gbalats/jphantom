@@ -1,20 +1,20 @@
 package org.clyze.jphantom;
 
-import java.util.*;
 import java.nio.file.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import org.objectweb.asm.Opcodes;
 import org.slf4j.LoggerFactory;
 import org.kohsuke.args4j.*;
 import org.kohsuke.args4j.spi.*;
 import static ch.qos.logback.classic.Level.*;
 
 public class Options {
-
     private final static FileSystem fs = FileSystems.getDefault();
     private final static Logger logger = (Logger) LoggerFactory.getLogger("jphantom");
     private final static Level[] levels = {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL};
     private final static Options INSTANCE = new Options();
+    public static final int ASM_VER = Opcodes.ASM8;
 
     public static Options V() {
         return INSTANCE;

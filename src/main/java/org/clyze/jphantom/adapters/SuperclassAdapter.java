@@ -1,5 +1,6 @@
 package org.clyze.jphantom.adapters;
 
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.ClassVisitor;
@@ -10,7 +11,7 @@ public class SuperclassAdapter extends ClassVisitor implements Opcodes
 
     public SuperclassAdapter(ClassVisitor cv, Type superclass)
     {
-        super(ASM5, cv);
+        super(Options.ASM_VER, cv);
         this.superclass = superclass;
     }
 

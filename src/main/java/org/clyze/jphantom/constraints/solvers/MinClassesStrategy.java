@@ -18,7 +18,7 @@ public class MinClassesStrategy<V,E> implements InterfaceSolver.Strategy<V,E>
     protected Colored<V> getColored(V vertex)
     {
         if (!colored.containsKey(vertex))
-            colored.put(vertex, new Colored<V>(vertex));
+            colored.put(vertex, new Colored<>(vertex));
 
         return colored.get(vertex);
     }

@@ -1,6 +1,5 @@
 package org.clyze.jphantom.access;
 
-import java.util.*;
 import org.objectweb.asm.Opcodes;
 
 public class State implements Opcodes

@@ -40,12 +40,12 @@ public abstract class LayeringSolver<V,E> extends MultipleInheritanceSolver<V,E>
         Set<E> specialEdges = new HashSet<>();
         Set<V> next = graph.vertexSet();
 
-        List<Set<V>> strata = new LinkedList<>(Arrays.asList(next));
+        List<Set<V>> strata = new LinkedList<>(Collections.singletonList(next));
 
         while(true)
         {
             Set<V> prev = next;
-            next = new HashSet<V>();
+            next = new HashSet<>();
 
             strata.add(next);
             

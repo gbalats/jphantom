@@ -64,7 +64,7 @@ public class Conversions implements Types {
     }
 
     static {
-        Set<Type> tmp = new HashSet<>(Arrays.asList(Type.DOUBLE_TYPE));
+        Set<Type> tmp = new HashSet<>(Collections.singletonList(Type.DOUBLE_TYPE));
 
         Type[] types = {
             Type.FLOAT_TYPE, Type.LONG_TYPE, Type.INT_TYPE, 
@@ -96,7 +96,7 @@ public class Conversions implements Types {
 
     public static Conversion getAssignmentConversion(Type from, Type to)
     {
-        Pair<Type,Type> pair = new Pair<Type,Type>(from, to);
+        Pair<Type,Type> pair = new Pair<>(from, to);
 
         if (!cache.containsKey(pair))
             cache.put(pair, newAssignmentConversion(pair));

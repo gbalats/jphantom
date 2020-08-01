@@ -34,14 +34,14 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
         public Builder(V root, Factory<S> factory, DirectedGraph<V,E> graph)
         {
             this.root = root;
-            this.strategy = new MinClassesStrategy<V,E>(root);
+            this.strategy = new MinClassesStrategy<>(root);
             this.factory = factory;
             this.graph = graph;
         }
 
         public Builder(V root, Factory<S> factory, EdgeFactory<V,E> efactory)
         {
-            this(root, factory, new SimpleDirectedGraph<V,E>(efactory));
+            this(root, factory, new SimpleDirectedGraph<>(efactory));
         }
 
         public Builder<V,E,S> minimize(boolean min) {
@@ -99,8 +99,8 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
         classes = strategy.classSubsetOf(graph);
 
         // Interface Graph
-        DirectedGraph<V,E> igraph = 
-            new SimpleDirectedGraph<V,E>(graph.getEdgeFactory());
+        DirectedGraph<V,E> igraph =
+                new SimpleDirectedGraph<>(graph.getEdgeFactory());
                 
         // Fill interface graph
         for (E e : new HashSet<>(graph.edgeSet()))
@@ -152,14 +152,14 @@ public abstract class InterfaceSolver<V,E,S> extends AbstractSolver<V,E,S>
     protected void solveClassGraph(DirectedGraph<V,E> graph) 
         throws UnsatisfiableStateException
     {
-        classSolver = new SingleInheritanceSolver<V,E>(graph, root);
+        classSolver = new SingleInheritanceSolver<>(graph, root);
         classSolver.solve();
     }
 
     protected void solveInterfaceGraph(DirectedGraph<V,E> graph)
         throws UnsatisfiableStateException
     {
-        ifaceSolver = new MultipleInheritanceSolver<V,E>(graph, minimize);
+        ifaceSolver = new MultipleInheritanceSolver<>(graph, minimize);
         ifaceSolver.solve();
     }
 

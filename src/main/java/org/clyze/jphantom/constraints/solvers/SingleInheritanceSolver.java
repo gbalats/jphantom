@@ -40,11 +40,11 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
     
     private DirectedGraph<V,E> getComponent(DirectedGraph<V,E> graph, V node)
     {
-        UndirectedGraph<V,E> undirectedView = new AsUndirectedGraph<V,E>(graph);
+        UndirectedGraph<V,E> undirectedView = new AsUndirectedGraph<>(graph);
 
-        Set<V> nodes = new ConnectivityInspector<V,E>(undirectedView).connectedSetOf(node);
-        DirectedGraph<V,E> subgraph = new DirectedSubgraph<V,E>(graph, nodes, null);
-        DirectedGraph<V,E> result = new SimpleDirectedGraph<V,E>(graph.getEdgeFactory());
+        Set<V> nodes = new ConnectivityInspector<>(undirectedView).connectedSetOf(node);
+        DirectedGraph<V,E> subgraph = new DirectedSubgraph<>(graph, nodes, null);
+        DirectedGraph<V,E> result = new SimpleDirectedGraph<>(graph.getEdgeFactory());
         Graphs.addGraph(result, subgraph);
 
         return result;

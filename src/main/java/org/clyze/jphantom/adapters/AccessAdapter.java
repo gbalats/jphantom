@@ -1,6 +1,6 @@
 package org.clyze.jphantom.adapters;
 
-import java.util.*;
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 
@@ -9,7 +9,7 @@ public class AccessAdapter extends ClassVisitor implements Opcodes
     private final int access;
 
     public AccessAdapter(ClassVisitor cv, int access) {
-        super(ASM5, cv);
+        super(Options.ASM_VER, cv);
         this.access = access;
     }
 

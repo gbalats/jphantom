@@ -1,5 +1,6 @@
 package org.clyze.jphantom.adapters;
 
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
@@ -27,7 +28,7 @@ public class MethodAdder extends ClassVisitor implements Opcodes
     public MethodAdder(
         ClassVisitor cv, int mAcc, String mName, String mDesc, String[] mExc)
     {
-        super(ASM5, cv);
+        super(Options.ASM_VER, cv);
         this.mAcc = mAcc;
         this.mName = mName;
         this.mDesc = mDesc;

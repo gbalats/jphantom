@@ -17,8 +17,8 @@ public class GraphConverter implements Types
 
     public DirectedGraph<Node,Edge> convert()
     {
-        DirectedGraph<Node,Edge> graph = 
-            new SimpleDirectedGraph<Node,Edge>(Edge.factory);
+        DirectedGraph<Node,Edge> graph =
+                new SimpleDirectedGraph<>(Edge.factory);
 
         // Add vertices
 
@@ -47,7 +47,7 @@ public class GraphConverter implements Types
 
         // Check for cycles 
 
-        if (new CycleDetector<Node,Edge>(graph).detectCycles())
+        if (new CycleDetector<>(graph).detectCycles())
             throw new CyclicHierarchyException(graph.toString());
 
         return graph;

@@ -34,36 +34,29 @@ public class JarExtender
 
     public void extend() throws IOException
     {
-        JarFile injar = new JarFile(in.toFile());
 
-        try {
+        try (JarFile injar = new JarFile(in.toFile())) {
             // Manifest jarManifest = injar.getManifest();
-            JarOutputStream outjar = new JarOutputStream(
-                new FileOutputStream(out.toFile()));
 
-            try {
+            try (JarOutputStream outjar = new JarOutputStream(
+                    new FileOutputStream(out.toFile()))) {
                 logger.info("Copying old entries...");
 
                 // Copy the old jar
-                for (JarEntry entry : Collections.list(injar.entries()))
-                {
+                for (JarEntry entry : Collections.list(injar.entries())) {
                     // Get an input stream for the entry.
                     InputStream entryStream = injar.getInputStream(entry);
 
                     // Read the entry and write it to the temp jar.
                     outjar.putNextEntry(entry);
-                    
+
                     while ((bytesRead = entryStream.read(buffer)) != -1)
                         outjar.write(buffer, 0, bytesRead);
                 }
 
                 // Add the complement files
                 Files.walkFileTree(dir, new JarEntryCopyingVisitor(outjar));
-            } finally {
-                outjar.close();
             }
-        } finally {
-            injar.close();
         }
     }
 
@@ -79,23 +72,19 @@ public class JarExtender
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             throws IOException
         {
-            InputStream stream = new FileInputStream(file.toFile());
-            file = file.toAbsolutePath();
 
-            try
-            {
+            try (InputStream stream = new FileInputStream(file.toFile())) {
+                file = file.toAbsolutePath();
                 file = dir.toAbsolutePath().relativize(file);
                 logger.info("Adding entry: " + file);
 
                 // Create a jar entry and add it to the temp jar.
-                JarEntry entry = new JarEntry(file.toString());
+                JarEntry entry = new JarEntry(file.toString().replace("\\", "/"));
                 jar.putNextEntry(entry);
-                            
+
                 // Read the file and write it to the jar.
                 while ((bytesRead = stream.read(buffer)) != -1)
                     jar.write(buffer, 0, bytesRead);
-            } finally {
-                stream.close();
             }
 
             return FileVisitResult.CONTINUE;

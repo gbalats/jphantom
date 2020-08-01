@@ -8,6 +8,6 @@ public class MapFactory<K,V> implements Factory<Map<K,V>>
 
     @Override
     public Map<K,V> create() {
-        return new HashMap<K,V>();
+        return new HashMap<>();
     }
 }

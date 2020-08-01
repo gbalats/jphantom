@@ -1,6 +1,8 @@
 package org.clyze.jphantom.adapters;
 
 import java.util.*;
+
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.ClassVisitor;
@@ -11,8 +13,8 @@ public class InterfaceAdder extends ClassVisitor implements Opcodes
 
     public InterfaceAdder(ClassVisitor cv, Set<Type> newInterfaces)
     {
-        super(ASM5, cv);
-        this.ifaces = new HashSet<String>();
+        super(Options.ASM_VER, cv);
+        this.ifaces = new HashSet<>();
 
         for (Type i : newInterfaces)
             ifaces.add(i.getInternalName());
@@ -23,7 +25,7 @@ public class InterfaceAdder extends ClassVisitor implements Opcodes
         String name, String signature, 
         String superName, String[] interfaces)
     {
-        Set<String> allIfaces = new HashSet<String>(ifaces);
+        Set<String> allIfaces = new HashSet<>(ifaces);
         allIfaces.addAll(Arrays.asList(interfaces));
         super.visit(
             version, 

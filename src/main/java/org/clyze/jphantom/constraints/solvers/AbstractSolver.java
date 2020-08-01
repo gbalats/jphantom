@@ -1,7 +1,6 @@
 package org.clyze.jphantom.constraints.solvers;
 
 import org.clyze.jphantom.util.Factory;
-import java.util.*;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 
@@ -17,14 +16,14 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     ////////////// Constructors //////////////
 
     public AbstractSolver(EdgeFactory<V,E> factory, Factory<S> solutionFactory) {
-        this(new SimpleDirectedGraph<V,E>(factory), solutionFactory);
+        this(new SimpleDirectedGraph<>(factory), solutionFactory);
     }
 
     public AbstractSolver(DirectedGraph<V,E> graph, Factory<S> solutionFactory) {
         this.solutionFactory = solutionFactory;
         this.factory = graph.getEdgeFactory();
         this._graph = graph;
-        this.unmodifiableGraph = new UnmodifiableDirectedGraph<V,E>(graph);
+        this.unmodifiableGraph = new UnmodifiableDirectedGraph<>(graph);
     }
 
     //////////////// Methods ////////////////
@@ -49,7 +48,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     {
         if (solved) { return this; }
 
-        DirectedGraph<V,E> backup = new SimpleDirectedGraph<V,E>(factory);
+        DirectedGraph<V,E> backup = new SimpleDirectedGraph<>(factory);
         Graphs.addGraph(backup, _graph);
         solution = solutionFactory.create();
         solve(backup);

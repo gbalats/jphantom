@@ -50,13 +50,13 @@ public class MultipleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,Lis
     protected void solve(DirectedGraph<V,E> graph) throws UnsatisfiableStateException
     {
         // Check for cycles in the interface graph
-        if (new CycleDetector<V,E>(graph).detectCycles())
+        if (new CycleDetector<>(graph).detectCycles())
             throw new GraphCycleException();
 
         // Remove redundant edges
         if (minimize) {
             // Compute transitive closure
-            SimpleDirectedGraph<V,E> closure = new SimpleDirectedGraph<V,E>(factory);
+            SimpleDirectedGraph<V,E> closure = new SimpleDirectedGraph<>(factory);
 
             addGraph(closure, graph);
             TransitiveClosure.INSTANCE.closeSimpleDirectedGraph(closure);

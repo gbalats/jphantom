@@ -1,5 +1,6 @@
 package org.clyze.jphantom.adapters;
 
+import org.clyze.jphantom.Options;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -13,7 +14,7 @@ public class FieldAdder extends ClassVisitor implements Opcodes
 
     public FieldAdder(ClassVisitor cv, int fAcc, String fName, String fDesc)
     {
-        super(ASM5, cv);
+        super(Options.ASM_VER, cv);
         this.fAcc = fAcc;
         this.fName = fName;
         this.fDesc = fDesc;
