@@ -48,10 +48,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     {
         if (solved) { return this; }
 
-        DirectedGraph<V,E> backup = new SimpleDirectedGraph<>(factory);
-        Graphs.addGraph(backup, _graph);
         solution = solutionFactory.create();
-        solve(backup);
         solved = true;
         return this;
     }
