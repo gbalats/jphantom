@@ -27,6 +27,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
     private final Interpreter<CompoundValue> interpreter;
     private String cName;
     private Type returnType;
+    private Map<Integer, Type> knownTypes;
     private Map<Label,List<Command>> commands;
    
     public TypeConstraintExtractor(TypeConstraintSolver solver) {
@@ -47,8 +48,10 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
     public final void visit(MethodNode meth) throws AnalyzerException
     {
+        Type methodType = Type.getMethodType(meth.desc);
+
         // Save return type
-        returnType = Type.getReturnType(meth.desc);
+        returnType = methodType.getReturnType();
 
         // Analyze Method
         analyzer.analyze(cName, meth);
@@ -59,10 +62,26 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
         commands = new HashMap<>();
 
+        boolean isStatic = (meth.access & Opcodes.ACC_STATIC) > 0;
+        knownTypes = new HashMap<>();
+        if (!isStatic) {
+            knownTypes.put(0, Type.getObjectType(cName));
+        }
+        int argIndex = isStatic ? 0 : 1;
+        for (Type argType : methodType.getArgumentTypes()) {
+            knownTypes.put(argIndex, argType);
+            argIndex += argType.getSize();
+        }
+
         if (meth.localVariables != null)
             for (LocalVariableNode local : meth.localVariables) {
                 Type t = Type.getType(local.desc);
                 int index = local.index;
+
+                // Skip if local variable is clearly bogus
+                if (!doesLocalMatchExpected(index, t))
+                    continue;
+
                 Label start = local.start.getLabel();
                 Label end = local.end.getLabel();
 
@@ -70,10 +89,10 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 Command removal = mv.new LocalVariableRemoval(index, t, local.name);
 
                 if (!commands.containsKey(start))
-                    commands.put(start, new LinkedList<Command>());
+                    commands.put(start, new LinkedList<>());
 
                 if (!commands.containsKey(end))
-                    commands.put(end, new LinkedList<Command>());
+                    commands.put(end, new LinkedList<>());
 
                 commands.get(start).add(addition);
                 commands.get(end).add(removal);
@@ -92,6 +111,20 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 .message("Instruction: %d", mv.insnNo)
                 .method(meth.name, meth.desc).cause(e).build();
         }
+    }
+
+    private boolean doesLocalMatchExpected(int index, Type actualType) {
+        // Only check against types we know about
+        if (knownTypes.containsKey(index)) {
+            Type known = knownTypes.get(index);
+            // If the type is object, and the expected type is any object type, its ok
+            if (actualType.equals(OBJECT) && known.getSize() >= Type.OBJECT) {
+                return true;
+            }
+            // Otherwise we must have an exact match
+            return known.equals(actualType);
+        }
+        return true;
     }
 
     public class MethodConstraintExtractor extends MethodVisitor
@@ -181,6 +214,8 @@ public class TypeConstraintExtractor extends AbstractExtractor
                         
                         if (declarations.containsKey(i)) {
                             Type declaredType = declarations.get(i);
+                            if (!doesLocalMatchExpected(i, declaredType))
+                                continue;
 
                             assert declaredType != null;
 
@@ -225,8 +260,17 @@ public class TypeConstraintExtractor extends AbstractExtractor
                         Type declaredType = declarations.get(var);
                         assert declaredType != null;
 
-                        // Found local variable in local variable table
-                        addConstraint(val, declaredType);
+                        // Found local variable in local variable table, actual types should match what we expect
+                        if (val != null) {
+                            for (BasicValue value : val.values()) {
+                                Type actualType = value.getType();
+                                if (doesLocalMatchExpected(var, declaredType) && doesLocalMatchExpected(var, actualType))
+                                    addConstraint(value, declaredType);
+                                else
+                                   logger.debug("Local variable {} is declared as {} but found {}. Ignoring it.",
+                                           var, declaredType, actualType);
+                            }
+                        }
                     }
                     break;
                 case ASTORE:
@@ -238,8 +282,17 @@ public class TypeConstraintExtractor extends AbstractExtractor
                         Type declaredType = declarations.get(var);
                         assert declaredType != null;
 
-                        // Found local variable in local variable table
-                        addConstraint(obj, declaredType);
+                        // Found local variable in local variable table, actual types should match what we expect
+                        if (obj != null) {
+                            for (BasicValue value : obj.values()) {
+                                Type actualType = value.getType();
+                                if (doesLocalMatchExpected(var, declaredType) && doesLocalMatchExpected(var, actualType))
+                                    addConstraint(value, declaredType);
+                                else
+                                    logger.debug("Local variable {} is declared as {} but found {}. Ignoring it.",
+                                            var, declaredType, actualType);
+                            }
+                        }
                     }
                     break;
                 default:
