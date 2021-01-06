@@ -125,7 +125,6 @@
         <version>3.9.0</version>
       </plugin>
 
-      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -149,6 +148,7 @@
         <configuration>
           <serverId>ossrh</serverId>
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <!-- <stagingProfileId>7edbe315063867</stagingProfileId> -->
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
@@ -183,7 +183,7 @@
           <doclint>none</doclint>
         </configuration>
       </plugin>
--->
+
       <!-- Specifying Main Class -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
