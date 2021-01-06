@@ -122,9 +122,23 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 return true;
             }
             // Otherwise we must have an exact match
-            return known.equals(actualType);
+            return isChildOf(known, actualType);
         }
         return true;
+    }
+
+    private boolean isChildOf(Type parent, Type child) {
+        if (parent.equals(child))
+            return true;
+        try {
+            Type childParent = hierarchy.getSuperclass(child);
+            if (childParent != null && isChildOf(parent, childParent))
+                return true;
+            for (Type childItf : hierarchy.getInterfaces(child))
+                if (isChildOf(parent, childItf))
+                    return true;
+        } catch (TypeNotPresentException ignored) {}
+        return false;
     }
 
     public class MethodConstraintExtractor extends MethodVisitor
