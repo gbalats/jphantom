@@ -346,7 +346,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 if (phantom.getSort() == Type.ARRAY)
                     break;
 
-                boolean abstractMethod = false;
+                boolean abstractMethod = itf;
 
                 // Skip available classes, except in the case of phantom field
 
@@ -399,17 +399,29 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Construct new method access context
 
-                MethodAccessEvent event = new MethodAccessEvent.Builder()
+                MethodAccessEvent eventMAcc = new MethodAccessEvent.Builder()
                     .setOpcode(abstractMethod ? INVOKEINTERFACE : opcode)
                     .setDescriptor(desc)
                     .setName(name)
                     .build();
 
+                // Mark owner class as interface
+                if (itf) {
+                    ClassAccessEvent eventItf = ClassAccessEvent.IS_INTERFACE;
+
+                    int access = ClassAccessStateMachine.v()
+                            .getEventSequence(phantom).moveTo(eventItf).getCurrentAccess();
+
+                    // Chain an access adapter
+                    assert tr.top != null;
+                    tr.top = new AccessAdapter(tr.top, access);
+                }
+
                 try {
                     // Compute new method access using the state machine
 
                     int access = MethodAccessStateMachine.v()
-                        .getEventSequence(name, phantom, desc).moveTo(event).getCurrentAccess();
+                        .getEventSequence(name, phantom, desc).moveTo(eventMAcc).getCurrentAccess();
 
                     // Chain a method-adder adapter
 
