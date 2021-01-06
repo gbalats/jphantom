@@ -14,7 +14,7 @@ public class Options {
     private final static Logger logger = (Logger) LoggerFactory.getLogger("jphantom");
     private final static Level[] levels = {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL};
     private final static Options INSTANCE = new Options();
-    public static final int ASM_VER = Opcodes.ASM8;
+    public static final int ASM_VER = Opcodes.ASM9;
 
     public static Options V() {
         return INSTANCE;

@@ -85,9 +85,9 @@
       <version>1.7.30</version>
     </dependency>
     <dependency>
-      <groupId>net.sf.jgrapht</groupId>
-      <artifactId>jgrapht</artifactId>
-      <version>0.8.3</version>
+      <groupId>org.jgrapht</groupId>
+      <artifactId>jgrapht-core</artifactId>
+      <version>1.0.1</version> <!-- After 1.1.0 are major api incompatibilities -->
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -105,7 +105,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <asm.version>8.0.1</asm.version>
+    <asm.version>9.0</asm.version>
   </properties>
 
   <build>
@@ -125,6 +125,7 @@
         <version>3.9.0</version>
       </plugin>
 
+      <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -148,7 +149,6 @@
         <configuration>
           <serverId>ossrh</serverId>
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <!-- <stagingProfileId>7edbe315063867</stagingProfileId> -->
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
@@ -183,7 +183,7 @@
           <doclint>none</doclint>
         </configuration>
       </plugin>
-
+-->
       <!-- Specifying Main Class -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
