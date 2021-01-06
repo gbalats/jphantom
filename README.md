@@ -30,7 +30,7 @@ your `pom.xml`:
 <dependency>
   <groupId>org.clyze</groupId>
   <artifactId>jphantom</artifactId>
-  <version>1.3</version>
+  <version>1.4</version>
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  compile 'org.clyze:jphantom:1.3'
+  compile 'org.clyze:jphantom:1.4'
 }
 ```
 
