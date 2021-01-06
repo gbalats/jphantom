@@ -12,6 +12,7 @@ import org.clyze.jphantom.hier.closure.*;
 import org.clyze.jphantom.exc.IllegalBytecodeException;
 import org.clyze.jphantom.exc.PhantomLookupException;
 
+import org.objectweb.asm.TypePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,10 +116,13 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-    {
-        visitAnnotationClass(Type.getType(desc));
-        return super.visitAnnotation(desc, visible);
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        return new AnnotationPhantomExtractor(desc, super.visitAnnotation(desc, visible));
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+        return new AnnotationPhantomExtractor(desc, super.visitTypeAnnotation(typeRef, typePath, desc, visible));
     }
 
     @Override
@@ -207,6 +211,93 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         } while(false);
     }
 
+    private class AnnotationPhantomExtractor extends AnnotationVisitor {
+       private final Type phantom;
+
+        public AnnotationPhantomExtractor(String desc, AnnotationVisitor annotationVisitor) {
+            super(ClassPhantomExtractor.this.api, annotationVisitor);
+            phantom = Type.getType(desc);
+            visitAnnotationClass(phantom);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String name, String desc) {
+            return new AnnotationPhantomExtractor(desc, super.visitAnnotation(name, desc));
+        }
+
+        @Override
+        public void visit(String name, Object value) {
+            do {
+               Type phantom = this.phantom;
+
+                String desc = "()" + Type.getType(value.getClass()).getDescriptor();
+
+                // Skip available classes, except in the case of phantom field
+                if (hierarchy.contains(phantom)) {
+                    try {
+                        // Lookup Method
+                        MethodSignature sign = members.lookupInterfaceMethod(phantom, name, desc);
+                        if (sign == null)
+                            throw new IllegalBytecodeException.Builder(clazz)
+                                    .method(mname, mdesc)
+                                    .message("Annotation method Lookup failed (%s): %s %s", phantom, desc, name)
+                                    .build();
+                        break;
+                    } catch (PhantomLookupException exc) {
+                        logger.trace("Found missing method reference in {}: {} {}", phantom, desc, name);
+                        logger.trace("First supertype: {}", exc.missingClass());
+
+                        // Add field to first phantom supertype instead
+                        phantom = exc.missingClass();
+                        assert phantom != null;
+                    }
+                }
+
+                // Get top class visitor
+
+                assert phantoms.contains(phantom) : phantom;
+
+                Transformer tr = phantoms.getTransformer(phantom);
+
+                // Construct new method access context
+
+                MethodAccessEvent event = new MethodAccessEvent.Builder()
+                        .setOpcode(INVOKEINTERFACE)
+                        .setDescriptor(desc)
+                        .setName(name)
+                        .build();
+
+                try {
+                    // Compute new method access using the state machine
+
+                    int access = MethodAccessStateMachine.v()
+                            .getEventSequence(name, phantom, desc).moveTo(event).getCurrentAccess();
+
+                    // Chain a method-adder adapter
+
+                    assert tr.top != null;
+                    tr.top = new MethodAdder(tr.top, access, name, desc);
+
+                } catch(IllegalTransitionException exc) {
+
+                    throw new IllegalBytecodeException.Builder(clazz)
+                            .method(mname, mdesc).cause(exc).build();
+                }
+            } while(false);
+            super.visit(name, value);
+        }
+
+        @Override
+        public void visitEnum(String name, String descriptor, String value) {
+            super.visitEnum(name, descriptor, value);
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return super.visitArray(name);
+        }
+    }
+
     private class FieldPhantomExtractor extends FieldVisitor
     {
         public FieldPhantomExtractor() {
@@ -218,11 +309,13 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         }
 
         @Override
-        public AnnotationVisitor visitAnnotation(
-            String desc, boolean visible)
-        {
-            visitAnnotationClass(Type.getType(desc));
-            return super.visitAnnotation(desc, visible);
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return new AnnotationPhantomExtractor(desc, super.visitAnnotation(desc, visible));
+        }
+
+        @Override
+        public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+            return new AnnotationPhantomExtractor(desc, super.visitTypeAnnotation(typeRef, typePath, desc, visible));
         }
     }
 
@@ -376,18 +469,19 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         }
 
         @Override
-        public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-        {
-            visitAnnotationClass(Type.getType(desc));
-            return super.visitAnnotation(desc, visible);
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            return new AnnotationPhantomExtractor(desc, super.visitAnnotation(desc, visible));
+        }
+
+        @Override
+        public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+            return new AnnotationPhantomExtractor(desc, super.visitTypeAnnotation(typeRef, typePath, desc, visible));
         }
 
         @Override
         public AnnotationVisitor visitParameterAnnotation(
-            int parameter, String desc, boolean visible)
-        {
-            visitAnnotationClass(Type.getType(desc));
-            return super.visitParameterAnnotation(parameter, desc, visible);
+            int parameter, String desc, boolean visible) {
+            return new AnnotationPhantomExtractor(desc, super.visitParameterAnnotation(parameter, desc, visible));
         }
 
         @Override
