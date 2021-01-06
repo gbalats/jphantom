@@ -77,8 +77,10 @@ public class MethodAccessStateMachine extends AccessStateMachine
             super.moveTo(event);
 
             switch (event.getOpcode()) {
-            case INVOKEVIRTUAL:
             case INVOKESTATIC:
+                // Static methods can belong to classes and interfaces
+                break;
+            case INVOKEVIRTUAL:
             case INVOKESPECIAL:
                 // <clinit> is never called explicitly
                 // => name must be <init> => implies a class owner
