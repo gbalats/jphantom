@@ -56,7 +56,7 @@ public class Tests {
 
 	@Test
 	void testGeneratePhantoms() throws IOException {
-		JPhantom jPhantom = get("demo.jar");
+		JPhantom jPhantom = get("demo.jar"); // Only "Main.class" in the jar
 		assertNotNull(jPhantom);
 
 		jPhantom.run();
@@ -98,8 +98,10 @@ public class Tests {
 		assertNotExists(generated, "demo/itf/multi/Biped");
 		assertDefinesMethod(generated, "demo/itf/multi/Person", "jog", "()V");
 
-		// From the array loop at the bottom, a dog and human both call "speak" from Animal
+		// From the array loop at the bottom, Dog and Person both call "speak" from Animal
 		assertExists(generated, "demo/itf/multi/Animal");
+		assertImplements(generated, "demo/itf/multi/Dog", "demo/itf/multi/Animal");
+		assertImplements(generated, "demo/itf/multi/Person", "demo/itf/multi/Animal");
 		assertDefinesMethod(generated, "demo/itf/multi/Animal", "speak", "()V");
 	}
 

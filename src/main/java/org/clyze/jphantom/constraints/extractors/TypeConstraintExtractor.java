@@ -27,7 +27,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
     private final Interpreter<CompoundValue> interpreter;
     private String cName;
     private Type returnType;
-    private Map<Integer, Type> knownTypes;
+    private Map<Integer, Type> argTypes;
     private Map<Label,List<Command>> commands;
    
     public TypeConstraintExtractor(TypeConstraintSolver solver) {
@@ -63,13 +63,13 @@ public class TypeConstraintExtractor extends AbstractExtractor
         commands = new HashMap<>();
 
         boolean isStatic = (meth.access & Opcodes.ACC_STATIC) > 0;
-        knownTypes = new HashMap<>();
+        argTypes = new HashMap<>();
         if (!isStatic) {
-            knownTypes.put(0, Type.getObjectType(cName));
+            argTypes.put(0, Type.getObjectType(cName));
         }
         int argIndex = isStatic ? 0 : 1;
         for (Type argType : methodType.getArgumentTypes()) {
-            knownTypes.put(argIndex, argType);
+            argTypes.put(argIndex, argType);
             argIndex += argType.getSize();
         }
 
@@ -115,8 +115,8 @@ public class TypeConstraintExtractor extends AbstractExtractor
 
     private boolean doesLocalMatchExpected(int index, Type actualType) {
         // Only check against types we know about
-        if (knownTypes.containsKey(index)) {
-            Type known = knownTypes.get(index);
+        if (argTypes.containsKey(index)) {
+            Type known = argTypes.get(index);
             // If the type is object, and the expected type is any object type, its ok
             if (actualType.equals(OBJECT) && known.getSize() >= Type.OBJECT) {
                 return true;
@@ -220,12 +220,30 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     CompoundValue val = getStack(0);
                     CompoundValue arrayObj = getStack(2);
 
+                    if (arrayObj.asBasicValue() == null)
+                        break;
+                    Type arrayType = arrayObj.asBasicValue().getType();
+
+                    // Mark local value type as subtype of element type
+                    int max = getFrame().getLocals();
+                    for (int i = 0; i < max; i++) {
+                        if (val == getFrame().getLocal(i) && declarations.containsKey(i)) {
+                            Type declaredType = declarations.get(i);
+                            addConstraint(declaredType, arrayType.getElementType());
+                        }
+                    }
+
+                    // Commented out old code below.
+                    // I think it was incorrect since "arrayObj" may not be stored by the time we're storing items onto it.
+                    // Also, I have no idea what that second assert statement is trying to prove
+
+                    /*
                     int max = getFrame().getLocals();
 
                     for (int i = 0; i < max; i++) {
                         if (arrayObj != getFrame().getLocal(i))
                             continue;
-                        
+
                         if (declarations.containsKey(i)) {
                             Type declaredType = declarations.get(i);
                             if (!doesLocalMatchExpected(i, declaredType))
@@ -244,6 +262,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
                             break;
                         }
                     }
+                     */
                     break;
                 default:
                     break;

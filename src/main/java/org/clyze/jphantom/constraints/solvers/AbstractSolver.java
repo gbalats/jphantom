@@ -11,7 +11,7 @@ public abstract class AbstractSolver<V,E,S> implements Solver<V,E,S>
     private final Factory<S> solutionFactory;
     protected final EdgeFactory<V,E> factory;
     protected final DirectedGraph<V,E> _graph;
-    private DirectedGraph<V,E> unmodifiableGraph;
+    private final DirectedGraph<V,E> unmodifiableGraph;
 
     ////////////// Constructors //////////////
 
