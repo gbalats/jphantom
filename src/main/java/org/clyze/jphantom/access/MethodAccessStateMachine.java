@@ -44,10 +44,11 @@ public class MethodAccessStateMachine extends AccessStateMachine
         super(INIT_STATE);
     }
 
-    public static final MethodAccessStateMachine instance = 
+    public static MethodAccessStateMachine instance =
         new MethodAccessStateMachine();
 
     public static MethodAccessStateMachine v() { return instance; }
+    public static void refresh() { instance = new MethodAccessStateMachine(); }
 
     /////////////////////// Sequence Inner Class ///////////////////////
 

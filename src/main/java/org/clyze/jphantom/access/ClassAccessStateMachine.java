@@ -19,11 +19,11 @@ public class ClassAccessStateMachine extends AccessStateMachine
         super(null);
     }
 
-    public static final ClassAccessStateMachine instance = 
+    public static ClassAccessStateMachine instance =
         new ClassAccessStateMachine();
 
     public static ClassAccessStateMachine v() { return instance; }
-
+    public static void refresh() { instance = new ClassAccessStateMachine(); }
 
     /////////////////////// Sequence Inner Class ///////////////////////
 

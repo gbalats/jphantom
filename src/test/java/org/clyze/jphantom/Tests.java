@@ -1,5 +1,8 @@
 package org.clyze.jphantom;
 
+import org.clyze.jphantom.access.ClassAccessStateMachine;
+import org.clyze.jphantom.access.FieldAccessStateMachine;
+import org.clyze.jphantom.access.MethodAccessStateMachine;
 import org.clyze.jphantom.adapters.ClassPhantomExtractor;
 import org.clyze.jphantom.hier.ClassHierarchies;
 import org.clyze.jphantom.hier.ClassHierarchy;
@@ -30,16 +33,19 @@ public class Tests {
 	@AfterEach
 	void cleanup () {
 		// Clear static caches between tests.
-		// Surefire's fork-mode is busted.
-		try {
-			Constructor<Phantoms> phantomsConstructor = Phantoms.class.getDeclaredConstructor();
-			phantomsConstructor.setAccessible(true);
-			Phantoms newInstance = phantomsConstructor.newInstance();
-			Field instance = Phantoms.class.getDeclaredField("instance");
-			setConst(instance, newInstance);
-		} catch (Exception ex) {
-			fail(ex);
-		}
+		Phantoms.refresh();
+		ClassAccessStateMachine.refresh();
+		FieldAccessStateMachine.refresh();
+		MethodAccessStateMachine.refresh();
+	}
+
+	@Test
+	void run() throws IOException {
+		JPhantom jPhantom = get("pn.jar");
+		assertNotNull(jPhantom);
+		jPhantom.run();
+		Map<Type, byte[]> generated = jPhantom.getGenerated();
+		assertNotEquals(0, generated.size(), "Classes should have been generated");
 	}
 
 	@Test
