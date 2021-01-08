@@ -140,7 +140,8 @@ public class JPhantom {
             if (hierarchy.contains(p))
                 continue;
 
-            assert phantoms.contains(p) : p;
+            if (!Options.V().isSoftFail())
+                assert phantoms.contains(p) : p;
 
             // Get top class visitor
             Transformer tr = phantoms.getTransformer(p);

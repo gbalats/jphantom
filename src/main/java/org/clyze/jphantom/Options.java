@@ -47,6 +47,9 @@ public class Options {
     @Option(name = "--help", usage = "Help")
     private boolean help = false;
 
+    @Option(name = "--soft-fail", usage = "Attempt to recover partial results from conflicts")
+    private boolean softFail = false;
+
     @Option(name = "-o", metaVar = "<outjar>",
             usage = "the destination path of the complemented jar", 
             handler = PathOptionHandler.class)
@@ -73,8 +76,20 @@ public class Options {
         return help;
     }
 
+    public boolean isSoftFail() {
+        return softFail;
+    }
+
+    public void setSoftFail(boolean softFail) {
+        this.softFail = softFail;
+    }
+
     public Level getLevel() {
         return logLevel;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
     }
 
     public boolean purgeClassFiles() {
