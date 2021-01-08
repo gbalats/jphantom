@@ -3,6 +3,7 @@ package org.clyze.jphantom.constraints.extractors;
 import java.util.*;
 
 import org.clyze.jphantom.Options;
+import org.clyze.jphantom.hier.IncompleteSupertypesException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
@@ -122,23 +123,13 @@ public class TypeConstraintExtractor extends AbstractExtractor
                 return true;
             }
             // Otherwise we must have an exact match
-            return isChildOf(known, actualType);
+            try {
+                return closure.isSubtypeOf(actualType, known);
+            } catch (IncompleteSupertypesException e) {
+                return false;
+            }
         }
         return true;
-    }
-
-    private boolean isChildOf(Type parent, Type child) {
-        if (parent.equals(child))
-            return true;
-        try {
-            Type childParent = hierarchy.getSuperclass(child);
-            if (childParent != null && isChildOf(parent, childParent))
-                return true;
-            for (Type childItf : hierarchy.getInterfaces(child))
-                if (isChildOf(parent, childItf))
-                    return true;
-        } catch (TypeNotPresentException ignored) {}
-        return false;
     }
 
     public class MethodConstraintExtractor extends MethodVisitor

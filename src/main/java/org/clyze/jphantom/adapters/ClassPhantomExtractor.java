@@ -31,6 +31,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
     private final Phantoms phantoms = Phantoms.V();
     private final ClassHierarchy hierarchy;
+    private final ClassHierarchy.Snapshot closure;
     private final ClassMembers members;
     private final SignatureVisitor sv;
     private Type clazz;
@@ -40,6 +41,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     public ClassPhantomExtractor(int api, ClassVisitor cv, ClassHierarchy hierarchy, ClassMembers members) {
         super(api, cv);
         this.hierarchy = hierarchy;
+        this.closure = new CopyingSnapshot(hierarchy);
         this.members = members;
         this.sv = new PhantomAdder(hierarchy, members, phantoms);
     }
@@ -534,13 +536,18 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                                 .build();
 
                         // Check descriptor
-                        if (!sign.getDescriptor().equals(desc))
+                        if (!sign.getDescriptor().equals(desc)) {
+                            // If the descriptor mismatch can be chalked up to inheritance, do not throw
+                            try {
+                                if (closure.isSubtypeOf(sign.getType(), Type.getType(desc)))
+                                    break;
+                            } catch (IncompleteSupertypesException ignored) {}
+                            // Cannot resolve difference
                             throw new IllegalBytecodeException.Builder(clazz)
-                                .method(mname, mdesc)
-                                .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
-                                .build();
-
-                        break;
+                                    .method(mname, mdesc)
+                                    .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
+                                    .build();
+                        }
                     } catch (PhantomLookupException exc) {
                         logger.trace("Found missing field reference in {}: {} {}", phantom, desc, name);
 
