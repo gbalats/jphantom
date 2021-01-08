@@ -125,7 +125,7 @@ public class TypeConstraintExtractor extends AbstractExtractor
             // Otherwise we must have an exact match
             try {
                 return closure.isSubtypeOf(actualType, known);
-            } catch (IncompleteSupertypesException e) {
+            } catch (Throwable t) {
                 return false;
             }
         }
