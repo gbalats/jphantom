@@ -538,15 +538,12 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                         // Check descriptor
                         if (!sign.getDescriptor().equals(desc)) {
                             // If the descriptor mismatch can be chalked up to inheritance, do not throw
-                            try {
-                                if (closure.isSubtypeOf(sign.getType(), Type.getType(desc)))
-                                    break;
-                            } catch (IncompleteSupertypesException ignored) {}
-                            // Cannot resolve difference
-                            throw new IllegalBytecodeException.Builder(clazz)
-                                    .method(mname, mdesc)
-                                    .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
-                                    .build();
+                            // Otherwise, cannot resolve difference
+                            if (!isSubtypeOf(sign.getType(), Type.getType(desc)))
+                                throw new IllegalBytecodeException.Builder(clazz)
+                                        .method(mname, mdesc)
+                                        .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
+                                        .build();
                         }
                     } catch (PhantomLookupException exc) {
                         logger.trace("Found missing field reference in {}: {} {}", phantom, desc, name);
@@ -557,8 +554,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 }
 
                 // Get top class visitor
-
-                assert phantoms.contains(phantom) : phantom;
+                if (!Options.V().isSoftFail())
+                    assert phantoms.contains(phantom) : phantom;
 
                 Transformer tr = phantoms.getTransformer(phantom);
 
@@ -589,6 +586,14 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
             } while(false);
 
             super.visitFieldInsn(opcode, owner, name, desc);
+        }
+
+        private boolean isSubtypeOf(Type type, Type supertype) {
+            try {
+                if (closure.isSubtypeOf(type, supertype))
+                    return true;
+            } catch (IncompleteSupertypesException ignored) {}
+            return false;
         }
     }
 }
