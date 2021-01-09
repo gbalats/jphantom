@@ -50,6 +50,10 @@ public class Options {
     @Option(name = "--soft-fail", usage = "Attempt to recover partial results from conflicts")
     private boolean softFail = false;
 
+    @Option(name = "-java-version", metaVar = "<ver>",
+            usage = "Java version to target, defaulting to 5")
+    private int javaVersion = 5;
+
     @Option(name = "-o", metaVar = "<outjar>",
             usage = "the destination path of the complemented jar", 
             handler = PathOptionHandler.class)
@@ -90,6 +94,14 @@ public class Options {
 
     public void setLogLevel(Level logLevel) {
         this.logLevel = logLevel;
+    }
+
+    public int getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(int javaVersion) {
+        this.javaVersion = javaVersion;
     }
 
     public boolean purgeClassFiles() {

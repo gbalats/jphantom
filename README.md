@@ -46,7 +46,7 @@ dependencies {
 Usage
 -----
 
-    java -jar <jphantom>  <injar> [--debug] [--help] [--save-class-files] [--soft-fail] [-d <dir>] [-o <outjar>] [-v (--log, --verbose) N]
+    java -jar <jphantom>  <injar> [--debug] [--help] [--save-class-files] [--soft-fail] [-d <dir>] [-java-version <ver>][-o <outjar>] [-v (--log, --verbose) N]
     
      <injar>                 : the jar to be complemented
      --debug                 : Debug mode
@@ -54,6 +54,7 @@ Usage
      --save-class-files      : Save phantom class files
      --soft-fail             : Attempt to recover partial results from conflicts
      -d <dir>                : Phantom-classes destination directory
+     -java-version <ver>     : Java version to target, defaulting to 5
      -o <outjar>             : the destination path of the complemented jar
      -v (--log, --verbose) N : Level of verbosity
 
