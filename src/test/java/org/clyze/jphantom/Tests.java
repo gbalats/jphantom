@@ -17,7 +17,6 @@ import org.objectweb.asm.tree.ClassNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -37,15 +36,6 @@ public class Tests {
 		ClassAccessStateMachine.refresh();
 		FieldAccessStateMachine.refresh();
 		MethodAccessStateMachine.refresh();
-	}
-
-	@Test
-	void run() throws IOException {
-		JPhantom jPhantom = get("pn.jar");
-		assertNotNull(jPhantom);
-		jPhantom.run();
-		Map<Type, byte[]> generated = jPhantom.getGenerated();
-		assertNotEquals(0, generated.size(), "Classes should have been generated");
 	}
 
 	@Test
