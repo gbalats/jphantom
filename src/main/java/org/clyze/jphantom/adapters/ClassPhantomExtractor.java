@@ -395,7 +395,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
                 // Get top class visitor
 
-                assert phantoms.contains(phantom) : phantom;
+                if (!Options.V().isSoftFail())
+                    assert phantoms.contains(phantom) : phantom;
 
                 Transformer tr = phantoms.getTransformer(phantom);
 
