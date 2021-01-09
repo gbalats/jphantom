@@ -593,7 +593,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
             try {
                 if (closure.isSubtypeOf(type, supertype))
                     return true;
-            } catch (IncompleteSupertypesException ignored) {}
+            } catch (Throwable ignored) {}
             return false;
         }
     }
