@@ -23,6 +23,18 @@ public class Main {
 		instance.invokeMyInterfaceImpl();
 		instance.invokeMyInterfaceCopyImpl();
 		instance.invokeDog();
+		instance.invokeStatic();
+		instance.getStatic();
+	}
+	
+	private void getStatic() {
+		String message = StaticField.CONST;
+		System.out.println(message);
+	}
+
+	private void invokeStatic() {
+		StaticClass instance = StaticClass.get();
+		System.out.println(instance);
 	}
 
 	private void invokeDog() {

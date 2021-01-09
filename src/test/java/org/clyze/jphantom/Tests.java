@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -99,6 +100,14 @@ public class Tests {
 		assertImplements(generated, "demo/itf/multi/Dog", "demo/itf/multi/Animal");
 		assertImplements(generated, "demo/itf/multi/Person", "demo/itf/multi/Animal");
 		assertDefinesMethod(generated, "demo/itf/multi/Animal", "speak", "()V");
+
+		// From "invokeStatic" the static getter should be generated
+		assertExists(generated, "demo/StaticClass");
+		assertDefinesMethod(generated, "demo/StaticClass", "get", "()Ldemo/StaticClass;");
+
+		// From "getStatic" the static string should be generated
+		assertExists(generated, "demo/StaticField");
+		assertDefinesField(generated, "demo/StaticField", "CONST", "Ljava/lang/String;");
 	}
 
 	private void assertExists(Map<Type, byte[]> generated, String key) {
@@ -133,6 +142,21 @@ public class Tests {
 		Type supr = Type.getObjectType(superType);
 		Type impl = Type.getObjectType(subType);
 		assertNotEquals(supr.getInternalName(), new ClassReader(generated.get(impl)).getSuperName());
+	}
+
+	private void assertDefinesField(Map<Type, byte[]> generated, String owner, String name, String desc) {
+		boolean[] found = new boolean[1];
+		Type ownerType = Type.getObjectType(owner);
+		new ClassReader(generated.get(ownerType)).accept(new ClassVisitor(Options.ASM_VER) {
+			@Override
+			public FieldVisitor visitField(int access, String fName, String fDesc, String sig, Object value) {
+				if (name.equals(fName) && desc.equals(fDesc)) {
+					found[0] = true;
+				}
+				return null;
+			}
+		}, 0);
+		assertTrue(found[0]);
 	}
 
 	private void assertDefinesMethod(Map<Type, byte[]> generated, String owner, String name, String desc) {
