@@ -13,6 +13,10 @@ import org.objectweb.asm.Type;
 public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHierarchy>
     implements Types, TypeConstraintSolver
 {
+    private static final Random rand = new Random();
+    private final Comparator<Type> typeComparator = Comparator.<Type>comparingInt(o -> -_graph.incomingEdgesOf(o).size())
+            .thenComparingInt(o -> rand.nextInt());
+
     private boolean initialized = false;
     protected ClassHierarchy hierarchy;
     private ClassHierarchy.Snapshot closure = null;
@@ -185,13 +189,15 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
         // that prioritizes direct subclasses
         classSolver = new SingleInheritanceSolver<Type,SubtypeConstraint>(graph, OBJECT)
             {
-                private Random rand = new Random(System.currentTimeMillis());
-
                 @Override
                 protected Deque<Type> order(Set<Type> unconstrained, Type parent)
                 {
+                    // Store types in the following order:
+                    //  1. Types with known superclasses (ordered)
+                    //  2. Types with more edges (rest)
+                    //   - If two or more types have the same number of edges, place them adjacent in random order
                     Deque<Type> ordered = new LinkedList<>();
-                    List<Type> rest = new LinkedList<>();
+                    Set<Type> rest = new TreeSet<>(typeComparator);
 
                     for (Type t : unconstrained)
                         if (hierarchy.contains(t))
@@ -208,9 +214,6 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                         } else {
                             rest.add(t);
                         }
-
-                    // Randomize the remaining nodes order
-                    Collections.shuffle(rest, rand);
 
                     ordered.addAll(rest);
                     return ordered;
