@@ -544,6 +544,8 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                                         .message("Descriptors differ: %s != %s", desc, sign.getDescriptor())
                                         .build();
                         }
+                        // Break so we don't attempt to generate something we already have in the hierarchy
+                        break;
                     } catch (PhantomLookupException exc) {
                         logger.trace("Found missing field reference in {}: {} {}", phantom, desc, name);
 
