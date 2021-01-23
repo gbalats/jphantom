@@ -148,6 +148,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         final String signature,
         final String[] exceptions)
     {
+        // Storing method being analyzed
+        mname = name;
+        mdesc = desc;
 
         // Searching declared exceptions for missing types
         if (exceptions != null) {
@@ -161,10 +164,6 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 
         // Searching method descriptor for missing types
         new SignatureReader(desc).accept(sv);
-
-        // Storing method being analyzed
-        mname = name;
-        mdesc = desc;
 
         // Searching method body for missing types
         return new MethodPhantomExtractor(
@@ -228,9 +227,11 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
         @Override
         public void visit(String name, Object value) {
             do {
-               Type phantom = this.phantom;
+                Type phantom = this.phantom;
 
-                String desc = "()" + Type.getType(value.getClass()).getDescriptor();
+                // ASM doesn't pass the actual type of the thing being visited... ugh...
+                Class<?> cls = value.getClass();
+                String desc = "()" + Type.getType(cls).getDescriptor();
 
                 // Skip available classes, except in the case of phantom field
                 if (hierarchy.contains(phantom)) {
@@ -238,8 +239,9 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                         // Lookup Method
                         MethodSignature sign = members.lookupInterfaceMethod(phantom, name, desc);
                         if (sign == null)
+                            sign = lookupBackup(phantom, name, cls);
+                        if (sign == null)
                             throw new IllegalBytecodeException.Builder(clazz)
-                                    .method(mname, mdesc)
                                     .message("Annotation method Lookup failed (%s): %s %s", phantom, desc, name)
                                     .build();
                         break;
@@ -285,6 +287,30 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
                 }
             } while(false);
             super.visit(name, value);
+        }
+
+        private MethodSignature lookupBackup(Type phantom, String name, Class<?> cls) throws PhantomLookupException {
+            // This mess exists because ASM passes us an object and no actual info on what the original type of that object is.
+            if (cls.equals(Type.class))
+                cls = Class.class;
+            else if (cls.equals(Byte.class))
+                cls = byte.class;
+            else if (cls.equals(Boolean.class))
+                cls = boolean.class;
+            else if (cls.equals(Character.class))
+                cls = char.class;
+            else if (cls.equals(Short.class))
+                cls = short.class;
+            else if (cls.equals(Integer.class))
+                cls = int.class;
+            else if (cls.equals(Long.class))
+                cls = long.class;
+            else if (cls.equals(Float.class))
+                cls = float.class;
+            else if (cls.equals(Double.class))
+                cls = double.class;
+            String desc = "()" + Type.getType(cls).getDescriptor();
+            return members.lookupInterfaceMethod(phantom, name, desc);
         }
 
         @Override
