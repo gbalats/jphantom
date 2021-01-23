@@ -220,7 +220,10 @@ public class TypeConstraintExtractor extends AbstractExtractor
                     for (int i = 0; i < max; i++) {
                         if (val == getFrame().getLocal(i) && declarations.containsKey(i)) {
                             Type declaredType = declarations.get(i);
-                            addConstraint(declaredType, arrayType.getElementType());
+                            // Do not use the "element" type.
+                            // We can run into the case of "Type[][]" where we want "Type[]" instead, where "Type" is the element type
+                            Type arrayParentType = Type.getType(arrayType.getDescriptor().substring(1));
+                            addConstraint(declaredType, arrayParentType);
                         }
                     }
 
