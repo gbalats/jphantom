@@ -187,6 +187,7 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
 
         // Create specialized single inheritance solver
         // that prioritizes direct subclasses
+        boolean[] doShuffle = new boolean[1];
         classSolver = new SingleInheritanceSolver<Type,SubtypeConstraint>(graph, OBJECT)
             {
                 @Override
@@ -215,7 +216,14 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                             rest.add(t);
                         }
 
-                    ordered.addAll(rest);
+                    if (doShuffle[0]) {
+                        List<Type> shuffled = new ArrayList<>(rest);
+                        Collections.shuffle(shuffled);
+                        ordered.addAll(shuffled);
+                        doShuffle[0] = false;
+                    } else {
+                        ordered.addAll(rest);
+                    }
                     return ordered;
                 }
             };
@@ -226,6 +234,9 @@ public class BasicSolver extends InterfaceSolver<Type,SubtypeConstraint,ClassHie
                 classSolver.solve();
                 break;
             } catch (CrossoverConstraintException exc) {
+                // Mark shuffle flag. The optimized order for some reason is failing.
+                // A good shake should fix it.
+                doShuffle[0] = true;
                 continue;
             }
         }
