@@ -43,11 +43,27 @@ public class SingleInheritanceSolver<V,E> extends AbstractSolver<V,E,Map<V,V>>
         UndirectedGraph<V,E> undirectedView = new AsUndirectedGraph<>(graph);
 
         Set<V> nodes = new ConnectivityInspector<>(undirectedView).connectedSetOf(node);
-        DirectedGraph<V,E> subgraph = new DirectedSubgraph<>(graph, nodes, null);
+        DirectedGraph<V,E> subgraph = createSubgraph(graph, nodes);
         DirectedGraph<V,E> result = new SimpleDirectedGraph<>(graph.getEdgeFactory());
         Graphs.addGraph(result, subgraph);
 
         return result;
+    }
+
+    private DirectedGraph<V, E> createSubgraph(DirectedGraph<V, E> graph, Set<V> nodes) {
+        // Code below is equivalent to:  new DirectedSubgraph<>(graph, nodes, null);
+        //  - DirectedSubgraph stream filtering is quite slow
+        //  - Manually generate a subgraph using SimpleDirectedGraph with passed vertices "nodes"
+        DirectedGraph<V, E> subgraph = new SimpleDirectedGraph<>(graph.getEdgeFactory());
+        for (V vertex : nodes) {
+            subgraph.addVertex(vertex);
+            for (E edge : graph.outgoingEdgesOf(vertex)) {
+                V target = graph.getEdgeTarget(edge);
+                subgraph.addVertex(target);
+                subgraph.addEdge(graph.getEdgeSource(edge), target);
+            }
+        }
+        return subgraph;
     }
 
     private void placeUnder(V top, DirectedGraph<V,E> graph)

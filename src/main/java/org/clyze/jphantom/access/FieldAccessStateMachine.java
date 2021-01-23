@@ -1,6 +1,7 @@
 package org.clyze.jphantom.access;
 
 import java.util.*;
+
 import org.objectweb.asm.Type;
 import org.clyze.jphantom.constraints.*;
 import edu.umd.cs.findbugs.annotations.*;
@@ -42,11 +43,11 @@ public class FieldAccessStateMachine extends AccessStateMachine
         super(FINAL_STATE);
     }
 
-    public static final FieldAccessStateMachine instance = 
+    public static FieldAccessStateMachine instance =
         new FieldAccessStateMachine();
 
     public static FieldAccessStateMachine v() { return instance; }
-
+    public static void refresh() { instance = new FieldAccessStateMachine(); }
 
     /////////////////////// Sequence Inner Class ///////////////////////
 

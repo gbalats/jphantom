@@ -44,10 +44,11 @@ public class MethodAccessStateMachine extends AccessStateMachine
         super(INIT_STATE);
     }
 
-    public static final MethodAccessStateMachine instance = 
+    public static MethodAccessStateMachine instance =
         new MethodAccessStateMachine();
 
     public static MethodAccessStateMachine v() { return instance; }
+    public static void refresh() { instance = new MethodAccessStateMachine(); }
 
     /////////////////////// Sequence Inner Class ///////////////////////
 
@@ -77,8 +78,10 @@ public class MethodAccessStateMachine extends AccessStateMachine
             super.moveTo(event);
 
             switch (event.getOpcode()) {
-            case INVOKEVIRTUAL:
             case INVOKESTATIC:
+                // Static methods can belong to classes and interfaces
+                break;
+            case INVOKEVIRTUAL:
             case INVOKESPECIAL:
                 // <clinit> is never called explicitly
                 // => name must be <init> => implies a class owner

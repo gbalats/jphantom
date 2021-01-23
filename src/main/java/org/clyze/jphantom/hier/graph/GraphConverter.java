@@ -15,10 +15,10 @@ public class GraphConverter implements Types
         this.hierarchy = hierarchy;
     }
 
-    public DirectedGraph<Node,Edge> convert()
+    public DirectedGraph<Node,DefaultEdge> convert()
     {
-        DirectedGraph<Node,Edge> graph =
-                new SimpleDirectedGraph<>(Edge.factory);
+        DirectedGraph<Node,DefaultEdge> graph =
+                new SimpleDirectedGraph<>(DefaultEdge.class);
 
         // Add vertices
 

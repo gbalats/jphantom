@@ -1,10 +1,13 @@
 package org.clyze.jphantom.constraints;
 
+import com.esotericsoftware.reflectasm.FieldAccess;
+import org.jgrapht.graph.DefaultEdge;
 import org.objectweb.asm.Type;
 import org.jgrapht.EdgeFactory;
 
-public class SubtypeConstraint implements Constraint
+public class SubtypeConstraint extends DefaultEdge implements Constraint
 {
+    private static final FieldAccess parentAccessor;
     public final Type subtype;
     public final Type supertype;
 
@@ -17,6 +20,10 @@ public class SubtypeConstraint implements Constraint
 
         this.subtype = subtype;
         this.supertype = supertype;
+
+        // Set "IntrusiveEdge" values, which JGraphT internally uses to optimize fetching vertices of an edge
+        parentAccessor.set(this, "source", subtype);
+        parentAccessor.set(this, "target", supertype);
     }
 
     @Override
@@ -60,6 +67,15 @@ public class SubtypeConstraint implements Constraint
         public SubtypeConstraint createEdge(Type source, Type target)
         {
             return new SubtypeConstraint(source, target);
+        }
+    }
+
+
+    static {
+        try {
+            parentAccessor = FieldAccess.get(Class.forName("org.jgrapht.graph.IntrusiveEdge"));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException();
         }
     }
 }

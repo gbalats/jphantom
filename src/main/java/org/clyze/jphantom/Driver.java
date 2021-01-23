@@ -5,6 +5,7 @@ import org.clyze.jphantom.hier.ClassHierarchies;
 import org.clyze.jphantom.hier.ClassHierarchy;
 import org.clyze.jphantom.hier.UnmodifiableClassHierarchy;
 import org.clyze.jphantom.jar.JarExtender;
+import org.clyze.jphantom.util.FailableClassReader;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.objectweb.asm.ClassReader;
@@ -69,7 +70,7 @@ public class Driver implements Types
                     continue;
 
                 logger.trace("Reading jar entry: {}", entry.getName());
-                ClassReader reader = new ClassReader(jarFile.getInputStream(entry));
+                ClassReader reader = new FailableClassReader(jarFile.getInputStream(entry));
                 reader.accept(new ClassPhantomExtractor(hierarchy, members), 0);
 
                 // At this point, every phantom class has been extracted.

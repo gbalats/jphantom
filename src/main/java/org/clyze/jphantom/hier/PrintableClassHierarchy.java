@@ -2,6 +2,7 @@ package org.clyze.jphantom.hier;
 
 import org.clyze.jphantom.hier.graph.*;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.objectweb.asm.Type;
 import static org.jgrapht.Graphs.*;
 
@@ -9,7 +10,7 @@ public class PrintableClassHierarchy extends ForwardingClassHierarchy
 {
     private static final String step = "  ";
     private static final Node ROOT = Node.get(OBJECT);
-    private DirectedGraph<Node,Edge> graph = null;
+    private DirectedGraph<Node, DefaultEdge> graph = null;
     private StringBuilder builder = null;
 
     public PrintableClassHierarchy(ClassHierarchy hierarchy)

@@ -53,9 +53,12 @@ public class TypeInterpreter extends BasicInterpreter implements Opcodes, Types
         final BasicValue value2) throws AnalyzerException
     {
         if (insn.getOpcode() == AALOAD) {
-            return value1.equals(NULL_VALUE) ? 
-                NULL_VALUE :
-                newValue(ArrayTypes.elementOf(value1.getType()));
+            if (value1.equals(BasicValue.UNINITIALIZED_VALUE)) {
+                return BasicValue.UNINITIALIZED_VALUE;
+            } else if (value1.equals(NULL_VALUE)) {
+                return NULL_VALUE;
+            }
+            return newValue(ArrayTypes.elementOf(value1.getType()));
         }
         return super.binaryOperation(insn, value1, value2);
     }

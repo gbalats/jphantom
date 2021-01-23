@@ -14,7 +14,7 @@ public class Options {
     private final static Logger logger = (Logger) LoggerFactory.getLogger("jphantom");
     private final static Level[] levels = {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL};
     private final static Options INSTANCE = new Options();
-    public static final int ASM_VER = Opcodes.ASM8;
+    public static final int ASM_VER = Opcodes.ASM9;
 
     public static Options V() {
         return INSTANCE;
@@ -47,6 +47,13 @@ public class Options {
     @Option(name = "--help", usage = "Help")
     private boolean help = false;
 
+    @Option(name = "--soft-fail", usage = "Attempt to recover partial results from conflicts")
+    private boolean softFail = false;
+
+    @Option(name = "-java-version", metaVar = "<ver>",
+            usage = "Java version to target, defaulting to 5")
+    private int javaVersion = 5;
+
     @Option(name = "-o", metaVar = "<outjar>",
             usage = "the destination path of the complemented jar", 
             handler = PathOptionHandler.class)
@@ -73,8 +80,28 @@ public class Options {
         return help;
     }
 
+    public boolean isSoftFail() {
+        return softFail;
+    }
+
+    public void setSoftFail(boolean softFail) {
+        this.softFail = softFail;
+    }
+
     public Level getLevel() {
         return logLevel;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public int getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(int javaVersion) {
+        this.javaVersion = javaVersion;
     }
 
     public boolean purgeClassFiles() {

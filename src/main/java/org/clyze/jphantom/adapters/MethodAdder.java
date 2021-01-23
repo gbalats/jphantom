@@ -63,8 +63,9 @@ public class MethodAdder extends ClassVisitor implements Opcodes
                 mAcc, mName, mDesc, null, mExc);
 
             if (mv != null) {
-                // Add method body (only for classes)
-                if (!iface && !isAbstract)
+                // Add method body (only for classes or static methods)
+
+                if (isStatic || (!iface && !isAbstract))
                 {
                     int maxStack = 2;
                     int maxLocals = 0;

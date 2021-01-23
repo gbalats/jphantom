@@ -24,6 +24,9 @@ public abstract class ClassAccessEvent extends Event
         return System.identityHashCode(this);
     }
 
-    public static final ClassAccessEvent IS_ANNOTATION = 
+    public static final ClassAccessEvent IS_ANNOTATION =
         new ClassAccessEvent(ACC_ANNOTATION | ACC_INTERFACE | ACC_PUBLIC) {};
+
+    public static final ClassAccessEvent IS_INTERFACE =
+        new ClassAccessEvent(ACC_INTERFACE | ACC_PUBLIC) {};
 }

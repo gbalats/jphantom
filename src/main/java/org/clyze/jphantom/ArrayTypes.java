@@ -71,7 +71,7 @@ public class ArrayTypes
      */
     public static Type checkedArrayType(Type arrayType)
     {
-        if (arrayType.getSort() != Type.ARRAY)
+        if (arrayType == null || arrayType.getSort() != Type.ARRAY)
             throw new IllegalArgumentException("Non-array type: " + arrayType);
 
         Type type = newType(arrayType.getElementType(), arrayType.getDimensions());

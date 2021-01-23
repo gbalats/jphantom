@@ -10,8 +10,9 @@ public class Phantoms extends ForwardingSet<Type>
 {
     /////////////////// Singleton ///////////////////
 
-    private static final Phantoms instance = new Phantoms();
+    private static Phantoms instance = new Phantoms();
     public static Phantoms V() { return instance; }
+    public static void refresh() { instance = new Phantoms(); }
 
     ////////////////// Constructor //////////////////
 

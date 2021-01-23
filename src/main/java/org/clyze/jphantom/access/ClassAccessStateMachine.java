@@ -19,11 +19,11 @@ public class ClassAccessStateMachine extends AccessStateMachine
         super(null);
     }
 
-    public static final ClassAccessStateMachine instance = 
+    public static ClassAccessStateMachine instance =
         new ClassAccessStateMachine();
 
     public static ClassAccessStateMachine v() { return instance; }
-
+    public static void refresh() { instance = new ClassAccessStateMachine(); }
 
     /////////////////////// Sequence Inner Class ///////////////////////
 
@@ -58,6 +58,8 @@ public class ClassAccessStateMachine extends AccessStateMachine
             // (empty), private => (empty)
 
             if ((event.access & ACC_INTERFACE) != 0)
+                addConstraint(new IsanInterfaceConstraint(owner));
+            else
                 addConstraint(new IsaClassConstraint(owner));
 
             this.access = event.access;
