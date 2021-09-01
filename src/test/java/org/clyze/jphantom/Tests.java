@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class Tests {
 	@AfterEach
-	void cleanup () {
+	void cleanup() {
 		// Clear static caches between tests.
 		Phantoms.refresh();
 		ClassAccessStateMachine.refresh();
@@ -108,6 +108,13 @@ public class Tests {
 		// From "getStatic" the static string should be generated
 		assertExists(generated, "demo/StaticField");
 		assertDefinesField(generated, "demo/StaticField", "CONST", "Ljava/lang/String;");
+
+		// Annotations
+		assertExists(generated, "demo/anno/InnerAnno");
+		assertExists(generated, "demo/anno/InnerAnno$TheInner");
+		assertExists(generated, "demo/anno/MyAnno");
+		assertExists(generated, "demo/anno/MyFieldAnno");
+		assertExists(generated, "demo/anno/MyMethodAnno");
 	}
 
 	private void assertExists(Map<Type, byte[]> generated, String key) {

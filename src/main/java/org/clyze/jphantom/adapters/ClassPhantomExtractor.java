@@ -1,29 +1,35 @@
 package org.clyze.jphantom.adapters;
 
+import org.clyze.jphantom.ClassMembers;
 import org.clyze.jphantom.Options;
 import org.clyze.jphantom.Phantoms;
 import org.clyze.jphantom.Transformer;
-import org.clyze.jphantom.ClassMembers;
-import org.clyze.jphantom.fields.FieldSignature;
-import org.clyze.jphantom.methods.MethodSignature;
-import org.clyze.jphantom.access.*;
-import org.clyze.jphantom.hier.*;
-import org.clyze.jphantom.hier.closure.*;
+import org.clyze.jphantom.access.ClassAccessEvent;
+import org.clyze.jphantom.access.ClassAccessStateMachine;
+import org.clyze.jphantom.access.FieldAccessEvent;
+import org.clyze.jphantom.access.FieldAccessStateMachine;
+import org.clyze.jphantom.access.IllegalTransitionException;
+import org.clyze.jphantom.access.MethodAccessEvent;
+import org.clyze.jphantom.access.MethodAccessStateMachine;
 import org.clyze.jphantom.exc.IllegalBytecodeException;
 import org.clyze.jphantom.exc.PhantomLookupException;
-
-import org.objectweb.asm.TypePath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.objectweb.asm.Label;
+import org.clyze.jphantom.fields.FieldSignature;
+import org.clyze.jphantom.hier.ClassHierarchy;
+import org.clyze.jphantom.hier.IncompleteSupertypesException;
+import org.clyze.jphantom.hier.closure.PseudoSnapshot;
+import org.clyze.jphantom.methods.MethodSignature;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.signature.*;
+import org.objectweb.asm.TypePath;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 {
@@ -106,12 +112,12 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
             Transformer tr = phantoms.getTransformer(klass);
             ClassAccessEvent event = ClassAccessEvent.IS_ANNOTATION;
 
-            int access = ClassAccessStateMachine.v()
-                .getEventSequence(klass).moveTo(event).getCurrentAccess();
+            ClassAccessStateMachine.v()
+                    .getEventSequence(klass).moveTo(event).getCurrentAccess();
 
-            // Chain an access adapter
+            // Chain an access and annotation adapter
             assert tr.top != null;
-            tr.top = new AccessAdapter(tr.top, access);
+            tr.top = new AnnotationAdapter(tr.top);
         }
     }
 

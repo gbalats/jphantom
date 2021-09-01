@@ -25,8 +25,8 @@ public abstract class ClassAccessEvent extends Event
     }
 
     public static final ClassAccessEvent IS_ANNOTATION =
-        new ClassAccessEvent(ACC_ANNOTATION | ACC_INTERFACE | ACC_PUBLIC) {};
+        new ClassAccessEvent(ACC_ABSTRACT | ACC_ANNOTATION | ACC_INTERFACE | ACC_PUBLIC) {};
 
     public static final ClassAccessEvent IS_INTERFACE =
-        new ClassAccessEvent(ACC_INTERFACE | ACC_PUBLIC) {};
+        new ClassAccessEvent(ACC_ANNOTATION | ACC_INTERFACE | ACC_PUBLIC) {};
 }
