@@ -3,6 +3,7 @@ package demo;
 import demo.anno.MyAnno;
 import demo.anno.MyFieldAnno;
 import demo.anno.MyMethodAnno;
+import demo.anno.InnerAnno;
 import demo.itf.multi.Animal;
 import demo.itf.multi.Dog;
 import demo.itf.multi.Husky;
@@ -26,7 +27,8 @@ public class Main {
 		instance.invokeStatic();
 		instance.getStatic();
 	}
-	
+
+	@InnerAnno.TheInner("example")
 	private void getStatic() {
 		String message = StaticField.CONST;
 		System.out.println(message);
