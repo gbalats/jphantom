@@ -80,6 +80,7 @@ public class JarExtender
 
                 // Create a jar entry and add it to the temp jar.
                 JarEntry entry = new JarEntry(file.toString().replace("\\", "/"));
+                entry.setCompressedSize(-1); // force java to recalculate compressed size, preventing an error 
                 jar.putNextEntry(entry);
 
                 // Read the file and write it to the jar.
