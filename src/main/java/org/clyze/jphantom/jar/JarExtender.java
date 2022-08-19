@@ -46,6 +46,7 @@ public class JarExtender
                 for (JarEntry entry : Collections.list(injar.entries())) {
                     // Get an input stream for the entry.
                     InputStream entryStream = injar.getInputStream(entry);
+                    entry.setCompressedSize(-1); // force java to recalculate compressed size, preventing an error 
 
                     // Read the entry and write it to the temp jar.
                     outjar.putNextEntry(entry);
