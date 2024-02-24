@@ -31,10 +31,13 @@ import org.objectweb.asm.signature.SignatureVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
 {
     protected final static Logger logger = LoggerFactory.getLogger(ClassPhantomExtractor.class);
-
+    private final Set<Type> seenAnnos = new HashSet<>();
     private final Phantoms phantoms = Phantoms.V();
     private final ClassHierarchy hierarchy;
     private final ClassMembers members;
@@ -105,7 +108,7 @@ public class ClassPhantomExtractor extends ClassVisitor implements Opcodes
     {
         new SignatureReader(klass.toString()).acceptType(sv);
 
-        if (!hierarchy.contains(klass)) {
+        if (seenAnnos.add(klass) && !hierarchy.contains(klass)) {
 
             assert phantoms.contains(klass) : klass;
         

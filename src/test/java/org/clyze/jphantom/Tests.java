@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -190,8 +191,7 @@ public class Tests {
 		ClassHierarchy hierarchy = ClassHierarchies.fromJar(new JarFile(file));
 		ClassMembers members = ClassMembers.fromJar(new JarFile(file), hierarchy);
 		Map<Type, ClassNode> nodes = new HashMap<>();
-		JarFile jarFile = new JarFile(file);
-		try (JarInputStream jin = new JarInputStream(new FileInputStream(file))) {
+		try (JarFile jarFile = new JarFile(file); JarInputStream jin = new JarInputStream(Files.newInputStream(file.toPath()))) {
 			JarEntry entry;
 			while ((entry = jin.getNextJarEntry()) != null) {
 				if (entry.isDirectory())
@@ -204,8 +204,6 @@ public class Tests {
 				reader.accept(node, 0);
 				nodes.put(Type.getObjectType(node.name), node);
 			}
-		} finally {
-			jarFile.close();
 		}
 		return new JPhantom(nodes, hierarchy, members);
 	}
