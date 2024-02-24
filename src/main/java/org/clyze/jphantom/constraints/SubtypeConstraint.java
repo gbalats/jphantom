@@ -21,9 +21,13 @@ public class SubtypeConstraint extends DefaultEdge implements Constraint
         this.subtype = subtype;
         this.supertype = supertype;
 
-        // Set "IntrusiveEdge" values, which JGraphT internally uses to optimize fetching vertices of an edge
-        parentAccessor.set(this, "source", subtype);
-        parentAccessor.set(this, "target", supertype);
+        try {
+            // Set "IntrusiveEdge" values, which JGraphT internally uses to optimize fetching vertices of an edge
+            parentAccessor.set(this, "source", subtype);
+            parentAccessor.set(this, "target", supertype);
+        } catch (Throwable ignored) {
+            // Newer JDK's can throw an access exception if you don't open the reflection access.
+        }
     }
 
     @Override
