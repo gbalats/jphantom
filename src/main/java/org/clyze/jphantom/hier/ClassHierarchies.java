@@ -75,8 +75,14 @@ public class ClassHierarchies implements Opcodes, Types
 
                     // Compute Types
 
+                    String superName = reader.getSuperName();
+                    if (superName == null) {
+                        // "module-info" classes do not have a super-name value among other attributes
+                        superName = "java/lang/Object";
+                    }
+
                     Type clazz = Type.getObjectType(reader.getClassName());
-                    Type superclass = Type.getObjectType(reader.getSuperName());
+                    Type superclass = Type.getObjectType(superName);
                     Type ifaces[] = new Type[ifaceNames.length];
 
                     for (int i = 0; i < ifaces.length; i++)

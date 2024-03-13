@@ -30,7 +30,7 @@ your `pom.xml`:
 <dependency>
   <groupId>org.clyze</groupId>
   <artifactId>jphantom</artifactId>
-  <version>1.3</version>
+  <version>1.4.3</version>
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  compile 'org.clyze:jphantom:1.3'
+  compile 'org.clyze:jphantom:1.4.3'
 }
 ```
 
@@ -46,13 +46,15 @@ dependencies {
 Usage
 -----
 
-    java -jar <jphantom>  <injar> [--debug] [--help] [--save-class-files] [-d <dir>] [-o <outjar>] [-v (--log, --verbose) N]
+    java -jar <jphantom>  <injar> [--debug] [--help] [--save-class-files] [--soft-fail] [-d <dir>] [-java-version <ver>][-o <outjar>] [-v (--log, --verbose) N]
     
      <injar>                 : the jar to be complemented
      --debug                 : Debug mode
      --help                  : Help
      --save-class-files      : Save phantom class files
+     --soft-fail             : Attempt to recover partial results from conflicts
      -d <dir>                : Phantom-classes destination directory
+     -java-version <ver>     : Java version to target, defaulting to 5
      -o <outjar>             : the destination path of the complemented jar
      -v (--log, --verbose) N : Level of verbosity
 

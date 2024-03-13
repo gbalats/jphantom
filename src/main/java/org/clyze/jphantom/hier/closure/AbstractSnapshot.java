@@ -15,7 +15,7 @@ public abstract class AbstractSnapshot extends ForwardingClassHierarchy
         throws IncompleteSupertypesException
     {
         if (!contains(type))
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Snapshot does not contain type: " + type);
 
         return type.equals(supertype) || isStrictSubtypeOf(type, supertype);
     }

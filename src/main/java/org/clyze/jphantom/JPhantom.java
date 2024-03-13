@@ -3,10 +3,19 @@ package org.clyze.jphantom;
 import org.clyze.jphantom.access.ClassAccessStateMachine;
 import org.clyze.jphantom.access.FieldAccessStateMachine;
 import org.clyze.jphantom.access.MethodAccessStateMachine;
-import org.clyze.jphantom.adapters.*;
+import org.clyze.jphantom.adapters.InnerClassAdapter;
+import org.clyze.jphantom.adapters.InterfaceAdder;
+import org.clyze.jphantom.adapters.InterfaceTransformer;
+import org.clyze.jphantom.adapters.MethodAdder;
+import org.clyze.jphantom.adapters.PhantomAdder;
+import org.clyze.jphantom.adapters.SuperclassAdapter;
 import org.clyze.jphantom.constraints.Constraint;
 import org.clyze.jphantom.constraints.extractors.TypeConstraintExtractor;
-import org.clyze.jphantom.constraints.solvers.*;
+import org.clyze.jphantom.constraints.solvers.BasicSolver;
+import org.clyze.jphantom.constraints.solvers.ConstraintStoringSolver;
+import org.clyze.jphantom.constraints.solvers.PruningSolver;
+import org.clyze.jphantom.constraints.solvers.Solver;
+import org.clyze.jphantom.constraints.solvers.TypeConstraintSolver;
 import org.clyze.jphantom.hier.ClassHierarchies;
 import org.clyze.jphantom.hier.ClassHierarchy;
 import org.clyze.jphantom.hier.PrintableClassHierarchy;
@@ -27,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JPhantom {
     protected final static Logger logger =
@@ -110,6 +120,9 @@ public class JPhantom {
 
         // Add missing methods
         addMissingMethods(solution, new MethodDeclarations(solution, phantoms.getLookupTable()));
+
+        // Add inner/outer relations (compiler will not be happy if the inner/outer attributes are missing)
+        addInnerOuterRelations();
     }
 
     private void fillLookupTable(ClassHierarchy solution) throws IOException
@@ -140,7 +153,8 @@ public class JPhantom {
             if (hierarchy.contains(p))
                 continue;
 
-            assert phantoms.contains(p) : p;
+            if (!Options.V().isSoftFail())
+                assert phantoms.contains(p) : p;
 
             // Get top class visitor
             Transformer tr = phantoms.getTransformer(p);
@@ -186,6 +200,42 @@ public class JPhantom {
 
                 generated.put(p, cw.toByteArray());
             }
+        }
+    }
+
+    private void addInnerOuterRelations() {
+        Map<String, Type> typeLookup = phantoms.stream()
+                .collect(Collectors.toMap(Type::getInternalName, t -> t));
+        for (Type p : phantoms)
+        {
+            String name = p.getInternalName();
+            int innerIndex = name.lastIndexOf('$');
+            if (innerIndex <= 0)
+                continue;
+
+            try {
+                String outer = name.substring(0, innerIndex);
+                ClassReader cr = new ClassReader(generated.get(p));
+                int access = cr.getAccess();
+
+                ClassWriter cw = new ClassWriter(0);
+
+                // Add outer class
+                ClassVisitor cv = new InnerClassAdapter(cw, name, access);
+                cr.accept(cv, 0);
+                generated.put(p, cw.toByteArray());
+
+
+                // Add inner class
+                p = typeLookup.get(outer);
+                if (p != null) {
+                    cw = new ClassWriter(0);
+                    cv = new InnerClassAdapter(cw, name, access);
+                    cr = new ClassReader(generated.get(p));
+                    cr.accept(cv, 0);
+                    generated.put(p, cw.toByteArray());
+                }
+            } catch (Throwable t) {}
         }
     }
 

@@ -14,7 +14,7 @@ public abstract class AbstractExtractor implements ConversionVisitor, Types
 {
     protected final TypeConstraintSolver solver;
     protected final ClassHierarchy hierarchy;
-    private final ClassHierarchy.Snapshot closure;
+    protected final ClassHierarchy.Snapshot closure;
 
     private final static Logger logger = 
         LoggerFactory.getLogger(AbstractExtractor.class);
